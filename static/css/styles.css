@@ -1,0 +1,13 @@
+body {
+    font-family: 'Roboto', sans-seif;
+    background: -webkit-linear-gradient(to right, #EAEAEA, #DBDBDB, #F2F2F2, #ADA996);
+    background: linear-gradient(to right, #EAEAEA, #DBDBDB, #F2F2F2, #ADA996);
+
+}
+
+.content-container {
+    background-color: white;
+    width: 33%;
+    margin: 0 auto;
+    vertical-align: middle;
+}

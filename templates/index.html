@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/styles.css')}}">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+</head>
+<body>
+    <div class='content-container'>
+        <div class='welcome-box'>
+            <center>
+                <h2>Welcome to MARTA!</h2>
+                <p>Please sign-in or register your account.</p>
+                <div class="buttons">
+                    <form action ='/login/' method='GET'>
+                        <input type="submit" name="submit" value="Sign In"/>
+                    </form>
+                    <form action ='/register/' method='GET'>
+                        <input type="submit" name="submit" value="Register"/>
+                    </form>
+                </div>
+            </center>
+        </div>
+    </div>
+</body>
+</html>
