@@ -1,22 +1,29 @@
 from flask import Flask, request, render_template, url_for
 app = Flask(__name__)
 
+#To start local server:
+#1) In command line go to directory with project
+#2) Type FLASK_APP=app.py
+#3) For debugger mode type FLASK_DEBUG=1 (this auto-reloads the page upon code changes)
+#4) Type flask run
+#5) Copy resulting IP address into url bar
+
+#for automatic reloads of html while not in debug mode
 app.config.update(
     TEMPLATES_AUTO_RELOAD=True,
     EXPLAIN_TEMPLATE_LOADING=True)
 
+#render home page (which is the login page)
 @app.route('/')
 def index():
     return render_template('index.html')
 
+#render registration page
 @app.route('/register/', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
         return render_template('register.html')
 
-@app.route('/login/', methods=['GET', 'POST'])
-def login():
-    if request.method == 'GET':
-        return render_template('login.html')
+@app.route
 
 
