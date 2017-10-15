@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/styles.css')}}">
+</head>
+<body>
+    <div class="login-page">
+        <div class="form">
+            <img src="{{url_for('static', filename='images/marta.png')}}">
+            <div class="admin-form">
+                <button class='admin-button'>Station Management</button>
+                <button class='admin-button'>Suspended Cards</button>
+                <button class='admin-button'>Breeze Card Management</button>
+                <button class='admin-button'>Passenger Flow Report</button>
+                <p class="message"><a type=submit href="{{ url_for('index') }}">Log Out</a></p>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="{{url_for('static', filename='js/admin.js')}}"></script>
+</body>

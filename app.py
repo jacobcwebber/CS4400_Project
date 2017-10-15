@@ -20,5 +20,8 @@ def index():
 #render user login page
 
 #render admin login page
+@app.route('/admin')
+def admin():
+    return render_template('admin.html')
 
 
