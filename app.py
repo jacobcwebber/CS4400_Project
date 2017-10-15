@@ -17,12 +17,8 @@ app.config.update(
 def index():
     return render_template('index.html')
 
+#render user login page
 
-#render registration page (to be phased out and built into login w/ some js)
-@app.route('/register/', methods=['GET', 'POST'])
-def register():
-    if request.method == 'GET':
-        return render_template('register.html')
-
+#render admin login page
 
 
