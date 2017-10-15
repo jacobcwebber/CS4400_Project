@@ -8,22 +8,21 @@ app = Flask(__name__)
 #4) Type flask run
 #5) Copy resulting IP address into url bar
 
-#for automatic reloads of html while not in debug mode
 app.config.update(
     TEMPLATES_AUTO_RELOAD=True,
     EXPLAIN_TEMPLATE_LOADING=True)
 
-#render home page (which is the login page)
+#render login page
 @app.route('/')
 def index():
     return render_template('index.html')
 
-#render registration page
+
+#render registration page (to be phased out and built into login w/ some js)
 @app.route('/register/', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
         return render_template('register.html')
 
-@app.route
 
 
