@@ -1,0 +1,22 @@
+{
+  "name": "cs4400_marta_project",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jacobcwebber/CS4400_Project.git"
+  },
+  "author": "Jacob_Webber",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jacobcwebber/CS4400_Project/issues"
+  },
+  "homepage": "https://github.com/jacobcwebber/CS4400_Project#readme",
+  "description": "",
+  "devDependencies": {
+    "webpack": "^3.8.1"
+  }
+}
