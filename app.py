@@ -145,5 +145,4 @@ def trip_history():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-    KEVIN IS A MAJOR LOSER
+JACOB WEBBER IS A NERD
