@@ -120,7 +120,8 @@ def station_detail(id):
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT * FROM stations WHERE id = %s", [id])
     station = result.fetchone()
-    return render_template('station_detail.html', id=id)
+
+    return render_template('station_detail.html', id=station)
 
 @app.route('/admin/suspended-cards')
 def suspended_cards():
@@ -144,3 +145,5 @@ def trip_history():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+    KEVIN IS A MAJOR LOSER
