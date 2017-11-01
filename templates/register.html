@@ -1,24 +1,24 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-    <div class="login-page">
-        <div class="form">
-            <img src="{{url_for('static', filename='images/marta.png')}}">
-            <form class="register-form">
-                <input type="text" placeholder="username"/>
-                <input type="text" placeholder="email"/>
-                <input type="password" placeholder="password"/>
-                <input type="password" placeholder="confirm password"/>
-                <button>create</button>
-                <p class="message">Already registered? <a href="#">Sign In</a></p>
-            </form>
-            <form action="{{ url_for('admin') }}" method=get class="login-form">
-                <input type="text" placeholder="username"/>
-                <input type="password" placeholder="password"/>
-                <button type="submit">login</button>
-                <p class="message">Not registered? <a href="#">Create an account</a></p>
-            </form>
+<div class="form">
+    <img src="{{url_for('static', filename='images/marta.png')}}">
+    {% from "includes/_formhelpers.html" import render_field %}
+    <form class="register-form" method="POST" action="">
+        <div class="form-group">
+            {{render_field(form.username, class_="form-control")}}
         </div>
-    </div>
-    <script type="text/javascript" src="{{url_for('static', filename='js/index.js')}}"></script>
+        <div class="form-group">
+            {{render_field(form.email, class_="form-control")}}
+        </div>
+        <div class="form-group">
+          {{render_field(form.password, class_="form-control")}}
+        </div>
+        <div class="form-group">
+          {{render_field(form.confirm, class_="form-control")}}
+        </div>
+        <p><button type="submit">Create</button></p>
+        <p class="message">Already registered? <a href="/login">Sign In</a></p>
+    </form>
+</div>
 {% endblock %}

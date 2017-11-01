@@ -1,8 +1,9 @@
 from flask import Flask, request, render_template, url_for, logging, session, flash, redirect
 import pymysql.cursors
 from passlib.hash import sha256_crypt
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators, ValidationError
 from functools import wraps
+import re
 
 app = Flask(__name__)
 
@@ -22,15 +23,26 @@ def index():
 def about():
     return render_template('about.html')
 
+#use WTForms API to create easy form authentications
 class RegisterForm(Form):
-    username = StringField('Username', [validators.Length(min=4, max=25)])
-    email = StringField('Email', [validators.Length(min=6, max=50)])
-    password = PasswordField('Password', [
+    username = StringField('', [
+        validators.Length(min=4, max=25, message='Username must be 4 to 25 characters long')
+        ], render_kw={"placeholder": "username"})
+    email = StringField('', [
+        validators.Length(min = 5, max=35, message='Email must be 5 to 35 characters long')
+        ], render_kw={"placeholder": "email"})
+    password = PasswordField('', [
         validators.DataRequired(),
         validators.EqualTo('confirm', message='Passwords do not match')
-    ])
-    confirm = PasswordField('Confirm Password')
+    ], render_kw={"placeholder": "password"})
+    confirm = PasswordField('', render_kw={"placeholder": "confirm password"})
 
+    #custom validation using regex for ensuring email address is valid
+    def validate_email(form, field):
+        if not re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", field.data):
+            raise ValidationError('Please submit a valid email')
+
+#tests user registration details against constraints; adds to db if passes
 @app.route('/register', methods=['POST', 'GET'])
 def register():
     form = RegisterForm(request.form)
@@ -41,7 +53,9 @@ def register():
         password = sha256_crypt.encrypt(str(form.password.data))
 
         cur = connection.cursor()
-        cur.execute("INSERT INTO users(username, email, password) VALUES (%s, %s, %s)", (username, email, password))
+        cur.execute("INSERT INTO USER(username, password) VALUES (%s, %s)", (username, password))
+        cur.execute("INSERT INTO USER(username, password) VALUES (%s, %s)", (username, email))
+
         connection.commit()
         cur.close()
 
@@ -51,6 +65,7 @@ def register():
 
     return render_template('register.html', form=form)
 
+#authenticates login details; logs user in and changes session details if passes
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
@@ -83,9 +98,8 @@ def login():
 
     return render_template('login.html')
 
-# TODO: find out how this works
 # authentication system -- disallows anyone to manipulate url manually to go to specific pages
-# (i.e. user cannot log in and change url to /admin to access admin settings)
+# (i.e. cannot access passenger page if not logged in)
 def is_logged_in(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -96,6 +110,29 @@ def is_logged_in(f):
             return redirect(url_for('login'))
     return wrap
 
+# authentication system -- disallows anyone to manipulate url manually to go to specific pages
+# (i.e. passenger cannot change url to /admin to access admin settings)
+def is_admin(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'admin' in session:
+            return f(*args, **kwargs)
+        else:
+            flash ('Unauthorized. Requires administrator access.', 'danger')
+            return redirect(url_for('home'))
+    return wrap
+
+def is_passenger(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'passenger' in session:
+            return f(*args, **kwargs)
+        else:
+            flash ('Unauthorized. Requires passenger access.', 'danger')
+            return redirect(url_for('home'))
+    return wrap
+
+
 @app.route('/logout')
 @is_logged_in
 def logout():
@@ -104,11 +141,14 @@ def logout():
     return redirect(url_for('login'))
 
 @app.route('/passenger')
+@is_logged_in
+@is_passenger
 def passenger():
     return render_template('passenger.html')
 
 @app.route('/admin')
 @is_logged_in
+@is_admin
 def admin():
     return render_template('admin.html')
 
@@ -117,34 +157,46 @@ def station_management():
     return render_template('station_management.html')
 
 @app.route('/station-management/create-station')
+@is_logged_in
+@is_admin
 def create_station():
     return render_template('create_station.html')
 
 @app.route('/station-detail/<string:id>/')
+@is_logged_in
+@is_admin
 def station_detail(id):
-    cur = mysql.connection.cursor()
+    cur = connection.cursor()
     result = cur.execute("SELECT * FROM stations WHERE id = %s", [id])
     station = result.fetchone()
 
     return render_template('station_detail.html', id=station)
 
 @app.route('/suspended-cards')
+@is_logged_in
+@is_admin
 def suspended_cards():
     return render_template('suspended_cards.html')
 
 @app.route('/admin/card-management')
+@is_logged_in
+@is_admin
 def card_management_admin():
     return render_template('card_management_admin.html')
 
 @app.route('/flow-report')
+@is_logged_in
 def flow_report():
     return render_template('flow_report.html')
 
 @app.route('/passenger/card-management')
+@is_logged_in
+@is_passenger
 def card_management_passenger():
     return render_template('card_management_passenger.html')
 
 @app.route('/trip-history/<string:id>/')
+@is_logged_in
 def trip_history():
     return render_template('trip_history.html')
 
