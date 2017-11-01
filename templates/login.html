@@ -3,9 +3,9 @@
 {% block body %}
 <div class="form">
     <img src="{{url_for('static', filename='images/marta.png')}}">
-    <form action="{{ url_for('admin') }}" method=get class="login-form">
-        <input type="text" placeholder="username"/>
-        <input type="password" placeholder="password"/>
+    <form class="login-form" method='POST' action="">
+        <input placeholder = "username" type="text" name="username" class="form-control" value={{request.form.username}}>
+        <input placeholder = "password" type="password" name="password" class="form-control" value={{request.form.password}}>
         <button type="submit">login</button>
         <p class="message">Not registered? <a href="/register">Create an account</a></p>
     </form>

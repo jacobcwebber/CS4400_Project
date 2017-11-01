@@ -53,8 +53,8 @@ def register():
         password = sha256_crypt.encrypt(str(form.password.data))
 
         cur = connection.cursor()
-        cur.execute("INSERT INTO USER(username, password) VALUES (%s, %s)", (username, password))
-        cur.execute("INSERT INTO USER(username, password) VALUES (%s, %s)", (username, email))
+        cur.execute("INSERT INTO USER(Username, Password) VALUES (%s, %s)", (username, password))
+        cur.execute("INSERT INTO PASSENGER_EMAIL(Username, Email) VALUES (%s, %s)", (username, email))
 
         connection.commit()
         cur.close()
@@ -74,18 +74,18 @@ def login():
 
         cur = connection.cursor()
 
-        result = cur.execute("SELECT * FROM users WHERE username = %s", [username])
+        result = cur.execute("SELECT * FROM USER WHERE username = %s", [username])
 
         if result > 0:
             data = cur.fetchone()
-            password = data['password']
+            password = data['Password']
 
             if sha256_crypt.verify(password_attempt, password):
                 session['logged_in'] = True
                 session['username'] = username
 
                 flash('You are now logged in.', 'success')
-                return redirect(url_for('dashboard'))
+                return redirect(url_for('index'))
 
             else:
                 error = 'Invalid login'
@@ -141,14 +141,10 @@ def logout():
     return redirect(url_for('login'))
 
 @app.route('/passenger')
-@is_logged_in
-@is_passenger
 def passenger():
     return render_template('passenger.html')
 
 @app.route('/admin')
-@is_logged_in
-@is_admin
 def admin():
     return render_template('admin.html')
 
@@ -157,8 +153,6 @@ def station_management():
     return render_template('station_management.html')
 
 @app.route('/station-management/create-station')
-@is_logged_in
-@is_admin
 def create_station():
     return render_template('create_station.html')
 
@@ -201,4 +195,5 @@ def trip_history():
     return render_template('trip_history.html')
 
 if __name__ == '__main__':
+    app.secret_key='supersecretkey'
     app.run(debug=True)
