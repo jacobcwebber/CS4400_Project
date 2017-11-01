@@ -1,10 +1,8 @@
- <head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/styles.css')}}">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <title>MARTA</title>
- </head>
+{% extends 'layout.html'%}
 
+{% block body %}
 <p>This is the station management page.</p>
 <p><a type=submit href="{{ url_for('create_station') }}">Create new station</a></p>
 <p><a type=submit href="{{ url_for('station_detail') }}">View station detail</a></p>
+{% endblock %}
+

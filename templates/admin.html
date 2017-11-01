@@ -1,31 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/styles.css')}}">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <title>MARTA</title>
-</head>
-<body>
-    <div class="login-page">
-        <div class="form">
-            <img src="{{url_for('static', filename='images/marta.png')}}">
-            <div class="admin-form">
-                <form  action="{{ url_for('station_management') }}" method=get>
-                    <button class='admin-button'>Station Management</button>
-                </form>
-                <form  action="{{ url_for('suspended_cards') }}" method=get>
-                    <button class='admin-button'>Suspended Cards</button>
-                </form>
-                <form  action="{{ url_for('card_management_admin') }}" method=get>
-                    <button class='admin-button'>Breeze Card Management</button>
-                </form>
-                <form  action="{{ url_for('flow_report') }}" method=get>
-                    <button class='admin-button'>Passenger Flow Report</button>
-                </form>
-                <p class="message"><a type=submit href="{{ url_for('index') }}">Log Out</a></p>
-            </div>
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="login-page">
+    <div class="form">
+        <img src="{{url_for('static', filename='images/marta.png')}}">
+        <div class="admin-form">
+            <form  action="{{ url_for('station_management') }}" method=get>
+                <button class='admin-button'>Station Management</button>
+            </form>
+            <form  action="{{ url_for('suspended_cards') }}" method=get>
+                <button class='admin-button'>Suspended Cards</button>
+            </form>
+            <form  action="{{ url_for('card_management_admin') }}" method=get>
+                <button class='admin-button'>Breeze Card Management</button>
+            </form>
+            <form  action="{{ url_for('flow_report') }}" method=get>
+                <button class='admin-button'>Passenger Flow Report</button>
+            </form>
+            <p class="message"><a type=submit href="{{ url_for('index') }}">Log Out</a></p>
         </div>
     </div>
-    <script type="text/javascript" src="{{url_for('static', filename='js/admin.js')}}"></script>
-</body>
+</div>
+<script type="text/javascript" src="{{url_for('static', filename='js/admin.js')}}"></script>
+{% endblock %}

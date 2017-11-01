@@ -22,7 +22,6 @@ def index():
 def about():
     return render_template('about.html')
 
-
 class RegisterForm(Form):
     username = StringField('Username', [validators.Length(min=4, max=25)])
     email = StringField('Email', [validators.Length(min=6, max=50)])
@@ -84,7 +83,9 @@ def login():
 
     return render_template('login.html')
 
-# TODO: Figure out how this works more
+# TODO: find out how this works
+# authentication system -- disallows anyone to manipulate url manually to go to specific pages
+# (i.e. user cannot log in and change url to /admin to access admin settings)
 def is_logged_in(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -107,6 +108,7 @@ def passenger():
     return render_template('passenger.html')
 
 @app.route('/admin')
+@is_logged_in
 def admin():
     return render_template('admin.html')
 
@@ -114,11 +116,11 @@ def admin():
 def station_management():
     return render_template('station_management.html')
 
-@app.route('/admin/station-management/create-station')
+@app.route('/station-management/create-station')
 def create_station():
     return render_template('create_station.html')
 
-@app.route('/admin/station-detail/<string:id>/')
+@app.route('/station-detail/<string:id>/')
 def station_detail(id):
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT * FROM stations WHERE id = %s", [id])
@@ -126,7 +128,7 @@ def station_detail(id):
 
     return render_template('station_detail.html', id=station)
 
-@app.route('/admin/suspended-cards')
+@app.route('/suspended-cards')
 def suspended_cards():
     return render_template('suspended_cards.html')
 
@@ -134,7 +136,7 @@ def suspended_cards():
 def card_management_admin():
     return render_template('card_management_admin.html')
 
-@app.route('/admin/flow-report')
+@app.route('/flow-report')
 def flow_report():
     return render_template('flow_report.html')
 
@@ -142,7 +144,7 @@ def flow_report():
 def card_management_passenger():
     return render_template('card_management_passenger.html')
 
-@app.route('/passenger/trip-history')
+@app.route('/trip-history/<string:id>/')
 def trip_history():
     return render_template('trip_history.html')
 
