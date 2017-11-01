@@ -1,24 +1,27 @@
 from flask import Flask, request, render_template, url_for, logging, session, flash, redirect
-from flask_mysqldb import MySQL
+import pymysql.cursors
 from passlib.hash import sha256_crypt
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 from functools import wraps
 
 app = Flask(__name__)
 
-# MySQL configuration
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '123456'
-app.config['MYSQL_DB'] = 'marta_app'
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
-
-#initialize MySQL
-mysql = MySQL(app)
+# pymysql config
+connection = pymysql.connect(host='academic-mysql.cc.gatech.edu',
+                             user='cs4400_Group_8',
+                             password='i8vZtVC5',
+                             db='cs4400_Group_8',
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('home.html')
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
 
 class RegisterForm(Form):
     username = StringField('Username', [validators.Length(min=4, max=25)])
@@ -38,9 +41,9 @@ def register():
         email = form.email.data
         password = sha256_crypt.encrypt(str(form.password.data))
 
-        cur = mysql.connection.cursor()
+        cur = connection.cursor()
         cur.execute("INSERT INTO users(username, email, password) VALUES (%s, %s, %s)", (username, email, password))
-        mysql.connection.commit()
+        connection.commit()
         cur.close()
 
         flash('Congratulations! You are now registered.', 'success')
@@ -55,7 +58,7 @@ def login():
         username = request.form['username']
         password_attempt = request.form['password']
 
-        cur = mysql.connection.cursor()
+        cur = connection.cursor()
 
         result = cur.execute("SELECT * FROM users WHERE username = %s", [username])
 
@@ -79,7 +82,7 @@ def login():
             error = "Username not found"
             return render_template('login.html', error=error)
 
-    render_template('login.html')
+    return render_template('login.html')
 
 # TODO: Figure out how this works more
 def is_logged_in(f):
@@ -145,4 +148,3 @@ def trip_history():
 
 if __name__ == '__main__':
     app.run(debug=True)
-JACOB WEBBER IS A NERD
