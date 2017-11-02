@@ -7,7 +7,6 @@ import re
 
 app = Flask(__name__)
 
-# pymysql config
 connection = pymysql.connect(host='academic-mysql.cc.gatech.edu',
                              user='cs4400_Group_8',
                              password='i8vZtVC5',
@@ -28,9 +27,7 @@ class RegisterForm(Form):
     username = StringField('', [
         validators.Length(min=4, max=25, message='Username must be 4 to 25 characters long')
         ], render_kw={"placeholder": "username"})
-    email = StringField('', [
-        validators.Length(min = 5, max=35, message='Email must be 5 to 35 characters long')
-        ], render_kw={"placeholder": "email"})
+    email = StringField('', render_kw={"placeholder": "email"})
     password = PasswordField('', [
         validators.DataRequired(),
         validators.EqualTo('confirm', message='Passwords do not match')
@@ -39,6 +36,8 @@ class RegisterForm(Form):
 
     #custom validation using regex for ensuring email address is valid
     def validate_email(form, field):
+        if len(field.data) < 5 or len(field.data) > 35:
+            raise ValidationError('Email must be 5 to 35 characters long')
         if not re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", field.data):
             raise ValidationError('Please submit a valid email')
 
@@ -52,9 +51,12 @@ def register():
         email = form.email.data
         password = sha256_crypt.encrypt(str(form.password.data))
 
+        #add check to see if username or email exists in db
+
         cur = connection.cursor()
-        cur.execute("INSERT INTO USER(Username, Password) VALUES (%s, %s)", (username, password))
-        cur.execute("INSERT INTO PASSENGER_EMAIL(Username, Email) VALUES (%s, %s)", (username, email))
+        cur.execute("INSERT INTO User(Username, Password) VALUES (%s, %s)", (username, password))
+        cur.execute("INSERT INTO Passenger(Username, Email) VALUES (%s, %s)", (username, email))
+        #cur.execute("INSERT INTO Breezecard(BreezecardNum, Value, Owner VALUES(%s, %s, %s)", (number, value, username))
 
         connection.commit()
         cur.close()
@@ -74,17 +76,25 @@ def login():
 
         cur = connection.cursor()
 
-        result = cur.execute("SELECT * FROM USER WHERE username = %s", [username])
+        result = cur.execute("SELECT * FROM User WHERE Username = %s", [username])
 
         if result > 0:
             data = cur.fetchone()
             password = data['Password']
 
+            #checks if passwords match and logs you in if they do
             if sha256_crypt.verify(password_attempt, password):
                 session['logged_in'] = True
                 session['username'] = username
 
-                flash('You are now logged in.', 'success')
+                #sets admin session status from db query
+                cur.execute("SELECT IsAdmin FROM User WHERE Username = %s", [username])
+                if cur.fetchone()['IsAdmin'] == 1:
+                    session['admin'] = True
+                else:
+                    session['admin'] = False
+
+                flash('Welcome, ' + username + '. You are now logged in.', 'success')
                 return redirect(url_for('index'))
 
             else:
@@ -119,7 +129,7 @@ def is_admin(f):
             return f(*args, **kwargs)
         else:
             flash ('Unauthorized. Requires administrator access.', 'danger')
-            return redirect(url_for('home'))
+            return redirect(url_for('index'))
     return wrap
 
 def is_passenger(f):
@@ -129,7 +139,7 @@ def is_passenger(f):
             return f(*args, **kwargs)
         else:
             flash ('Unauthorized. Requires passenger access.', 'danger')
-            return redirect(url_for('home'))
+            return redirect(url_for('index'))
     return wrap
 
 
@@ -138,7 +148,7 @@ def is_passenger(f):
 def logout():
     session.clear()
     flash('You are now logged out', 'success')
-    return redirect(url_for('login'))
+    return redirect(url_for('index'))
 
 @app.route('/passenger')
 def passenger():
@@ -168,7 +178,6 @@ def station_detail(id):
 
 @app.route('/suspended-cards')
 @is_logged_in
-@is_admin
 def suspended_cards():
     return render_template('suspended_cards.html')
 

@@ -4,13 +4,26 @@
 <div class="form">
     <img src="{{url_for('static', filename='images/marta.png')}}">
     {% from "includes/_formhelpers.html" import render_field %}
-    <form class="login-form" method='POST' action="">
-        <input placeholder = "username" type="text" name="username" class="form-control" value={{request.form.username}}>
-        <input placeholder = "email" type="text" name="email" class="form-control" value={{request.form.email}}>
-        <input placeholder = "password" type="password" name="password" class="form-control" value={{request.form.password}}>
-        <input placeholder = "confirm" type="password" name="confirm" class="form-control" value={{request.form.confirm}}>
-        <button type="submit">Create</button>
+    <form class="register-form" method="POST" action="">
+        <div>
+            {{render_field(form.username, class_="form-control")}}
+        <div>
+            {{render_field(form.email, class_="form-control")}}
+        </div>
+        <div>
+          {{render_field(form.password, class_="form-control")}}
+        </div>
+        <div>
+          {{render_field(form.confirm, class_="form-control")}}
+        </div>
+        <div id="next-button"><button type="submit">Create</button></div>
         <p class="message">Already registered? <a href="/login">Sign In</a></p>
     </form>
 </div>
+
+<script>
+$("#next-button").click(fuction() {
+    alert("Button was clicked");
+});
+</script>
 {% endblock %}
