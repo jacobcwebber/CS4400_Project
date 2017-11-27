@@ -55,13 +55,14 @@ def register():
         username = form.username.data
         email = form.email.data
         password = sha256_crypt.encrypt(str(form.password.data))
+        number = form.breezecard.data
 
         cur = connection.cursor()
 
         try:
             cur.execute("INSERT INTO User(Username, Password) VALUES (%s, %s)", (username, password))
             cur.execute("INSERT INTO Passenger(Username, Email) VALUES (%s, %s)", (username, email))
-            #cur.execute("INSERT INTO Breezecard(BreezecardNum, Value, Owner VALUES(%s, %s, %s)", (number, value, username))
+            cur.execute("INSERT INTO Breezecard(BreezecardNum, Value, Owner) VALUES(%s, %s, %s)", (number, 0.00, username))
         except pymysql.IntegrityError:
             flash('This username is already taken. Please try again.', 'danger')
             return redirect(url_for('register'))
@@ -121,7 +122,7 @@ def login():
 
     return render_template('login.html')
 
-# authentication system -- disallows anyone to manipulate url manually to go to specific pages
+# disallows anyone to manipulate url manually to go to specific pages
 # (i.e. cannot access passenger page if not logged in)
 def is_logged_in(f):
     @wraps(f)
@@ -133,7 +134,7 @@ def is_logged_in(f):
             return redirect(url_for('login'))
     return wrap
 
-# authentication system -- disallows anyone to manipulate url manually to go to specific pages
+# disallows anyone to manipulate url manually to go to specific pages
 # (i.e. passenger cannot change url to /admin to access admin settings)
 def is_admin(f):
     @wraps(f)
