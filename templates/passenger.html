@@ -4,31 +4,35 @@
     <div class="login-page">
         <div class="form">
             <img src="{{url_for('static', filename='images/marta.png')}}">
-            <div class="admin-form">
-                <div class="breeze-card">
-                    <p>Breeze Card</p>
-                    <Select>
+            <div>
+                <div class="p-form-unit">
+                    <p class="p-unit left">Breeze Card</p>
+                    <Select class="p-unit right">
                         <option value="1">0000 0000 0000 0000</option>
                         <option value="2">0000 0000 0000 0001</option>
                     </Select>
                 </div>
-                <div class="balance">
-                    <p>Balance</p>
-                    <p>$15.00</p>
+                <div class="p-form-unit">
+                    <p class="p-unit left">Balance</p>
+                    <p class="p-unit right">$15.00</p>
                 </div>
-                <div class="start-trip">
-                    <p>Starting at</p>
-                    <p>North Springs - $2.50</p>
+                <div class="p-form-unit">
+                    <p class="p-unit left">Starting at</p>
+                    <p class="p-unit right">North Springs - $2.50</p>
                     <p>Begin Trip</p>
                 </div>
-                <div class="end-trip">
-                    <p>Ending at</p>
-                    <p>Midtown</p>
+                <div class="p-form-unit">
+                    <p class="p-unit left">Ending at</p>
+                    <p class="p-unit right">Midtown</p>
                     <p>End Trip</p>
                 </div>
-                <p class="message"><a type=submit href="{{ url_for('card_management_passenger') }}">Manage cards</a></p>
-                <p class="message"><a type=submit href="{{ url_for('trip_history') }}">View Trip History</a></p>
-                <p class="message"><a type=submit href="{{ url_for('index') }}">Log Out</a></p>
+                <div class="messages">
+                    <p class="p-unit"><a type="submit">Manage cards</a></p>
+                    <p class="p-unit">|</p>
+                    <p class="p-unit"><a type="submit">View Trip History</a></p>
+                    <p class="p-unit">|</p>
+                    <p class="p-unit"><a type="submit">Log Out</a></p>
+                </div>
             </div>
         </div>
     </div>

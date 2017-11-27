@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template, url_for, logging, session, flash, redirect
-import pymysql.cursors
+import pymysql
 from passlib.hash import sha256_crypt
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators, ValidationError
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators, ValidationError, IntegerField, RadioField
 from functools import wraps
 import re
 
@@ -12,7 +12,8 @@ connection = pymysql.connect(host='academic-mysql.cc.gatech.edu',
                              password='i8vZtVC5',
                              db='cs4400_Group_8',
                              charset='utf8mb4',
-                             cursorclass=pymysql.cursors.DictCursor)
+                             cursorclass=pymysql.cursors.DictCursor
+)
 
 @app.route('/')
 def index():
@@ -25,14 +26,15 @@ def about():
 #use WTForms API to create easy form authentications
 class RegisterForm(Form):
     username = StringField('', [
-        validators.Length(min=4, max=25, message='Username must be 4 to 25 characters long')
-        ], render_kw={"placeholder": "username"})
+        validators.Length(min=4, max=25, message='Username must be 4 to 25 characters long')],
+        render_kw={"placeholder": "username"})
     email = StringField('', render_kw={"placeholder": "email"})
     password = PasswordField('', [
         validators.DataRequired(),
-        validators.EqualTo('confirm', message='Passwords do not match')
-    ], render_kw={"placeholder": "password"})
+        validators.EqualTo('confirm', message='Passwords do not match')],
+        render_kw={"placeholder": "password"})
     confirm = PasswordField('', render_kw={"placeholder": "confirm password"})
+    breezecard = IntegerField('', render_kw={"placeholder": "breezecard number"})
 
     #custom validation using regex for ensuring email address is valid
     def validate_email(form, field):
@@ -41,7 +43,10 @@ class RegisterForm(Form):
         if not re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", field.data):
             raise ValidationError('Please submit a valid email')
 
-#tests user registration details against constraints; adds to db if passes
+    def validate_breezecard(form, field):
+        if len(str(field.data)) != 16:
+            raise ValidationError('Breezecard Number must be 16 digits')
+
 @app.route('/register', methods=['POST', 'GET'])
 def register():
     form = RegisterForm(request.form)
@@ -51,23 +56,24 @@ def register():
         email = form.email.data
         password = sha256_crypt.encrypt(str(form.password.data))
 
-        #add check to see if username or email exists in db
-
         cur = connection.cursor()
-        cur.execute("INSERT INTO User(Username, Password) VALUES (%s, %s)", (username, password))
-        cur.execute("INSERT INTO Passenger(Username, Email) VALUES (%s, %s)", (username, email))
-        #cur.execute("INSERT INTO Breezecard(BreezecardNum, Value, Owner VALUES(%s, %s, %s)", (number, value, username))
+
+        try:
+            cur.execute("INSERT INTO User(Username, Password) VALUES (%s, %s)", (username, password))
+            cur.execute("INSERT INTO Passenger(Username, Email) VALUES (%s, %s)", (username, email))
+            #cur.execute("INSERT INTO Breezecard(BreezecardNum, Value, Owner VALUES(%s, %s, %s)", (number, value, username))
+        except pymysql.IntegrityError:
+            flash('This username is already taken. Please try again.', 'danger')
+            return redirect(url_for('register'))
 
         connection.commit()
         cur.close()
 
         flash('Congratulations! You are now registered.', 'success')
-
         return redirect(url_for('login'))
 
     return render_template('register.html', form=form)
 
-#authenticates login details; logs user in and changes session details if passes
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if request.method == 'POST':
@@ -76,7 +82,10 @@ def login():
 
         cur = connection.cursor()
 
-        result = cur.execute("SELECT * FROM User WHERE Username = %s", [username])
+        result = cur.execute("SELECT * "
+                             "FROM User "
+                             "WHERE Username = %s"
+                             , [username])
 
         if result > 0:
             data = cur.fetchone()
@@ -88,7 +97,11 @@ def login():
                 session['username'] = username
 
                 #sets admin session status from db query
-                cur.execute("SELECT IsAdmin FROM User WHERE Username = %s", [username])
+                cur.execute("SELECT IsAdmin "
+                            "FROM User "
+                            "WHERE Username = %s"
+                            , [username])
+
                 if cur.fetchone()['IsAdmin'] == 1:
                     session['admin'] = True
                 else:
@@ -98,12 +111,12 @@ def login():
                 return redirect(url_for('index'))
 
             else:
-                error = 'Invalid login'
+                error = 'Invalid login.'
                 return render_template('login.html', error=error)
             cur.close()
 
         else:
-            error = "Username not found"
+            error = "Username not found."
             return render_template('login.html', error=error)
 
     return render_template('login.html')
@@ -116,7 +129,7 @@ def is_logged_in(f):
         if 'logged_in' in session:
             return f(*args, **kwargs)
         else:
-            flash ('Unauthorized, please login.', 'danger')
+            flash ('Unauthorized, please log in.', 'danger')
             return redirect(url_for('login'))
     return wrap
 
@@ -125,10 +138,10 @@ def is_logged_in(f):
 def is_admin(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        if 'admin' in session:
+        if session['admin'] == True:
             return f(*args, **kwargs)
         else:
-            flash ('Unauthorized. Requires administrator access.', 'danger')
+            flash ('Requires administrator access.', 'danger')
             return redirect(url_for('index'))
     return wrap
 
@@ -138,7 +151,7 @@ def is_passenger(f):
         if 'passenger' in session:
             return f(*args, **kwargs)
         else:
-            flash ('Unauthorized. Requires passenger access.', 'danger')
+            flash ('Requires passenger access.', 'danger')
             return redirect(url_for('index'))
     return wrap
 
@@ -151,10 +164,14 @@ def logout():
     return redirect(url_for('index'))
 
 @app.route('/passenger')
+@is_logged_in
+@is_passenger
 def passenger():
     return render_template('passenger.html')
 
 @app.route('/admin')
+@is_logged_in
+@is_admin
 def admin():
     return render_template('admin.html')
 
@@ -202,6 +219,10 @@ def card_management_passenger():
 @is_logged_in
 def trip_history():
     return render_template('trip_history.html')
+
+@app.errorhandler(404)
+def not_found(error):
+    return render_template('error.html'), 404
 
 if __name__ == '__main__':
     app.secret_key='supersecretkey'

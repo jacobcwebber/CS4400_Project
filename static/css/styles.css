@@ -70,3 +70,12 @@ img {
 .admin-button {
   margin-top: 6px;
 }
+.p-form-unit {
+  display: block;
+}
+.p-unit {
+  display: inline-block;
+}
+.messages {
+  display: block;
+}
