@@ -49,7 +49,7 @@ class RegisterForm(Form):
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
-    form = RegisterForm(request.form)
+    form = RegisterForm(request.form)x`
 
     if request.method == 'POST' and form.validate():
         username = form.username.data
@@ -62,9 +62,14 @@ def register():
         try:
             cur.execute("INSERT INTO User(Username, Password) VALUES (%s, %s)", (username, password))
             cur.execute("INSERT INTO Passenger(Username, Email) VALUES (%s, %s)", (username, email))
-            cur.execute("INSERT INTO Breezecard(BreezecardNum, Value, Owner) VALUES(%s, %s, %s)", (number, 0.00, username))
         except pymysql.IntegrityError:
             flash('This username is already taken. Please try again.', 'danger')
+            return redirect(url_for('register'))
+
+        try:
+            cur.execute("INSERT INTO Breezecard(BreezecardNum, Value, Owner) VALUES(%s, %s, %s)", (number, 0.00, username))
+        except pymysql.IntegrityError:
+            flash('This Breezecard Number is already taken. Please try again.', 'danger')
             return redirect(url_for('register'))
 
         connection.commit()
@@ -81,7 +86,7 @@ def login():
         username = request.form['username']
         password_attempt = request.form['password']
 
-        cur = connection.cursor()
+            cur = connection.cursor()
 
         result = cur.execute("SELECT * "
                              "FROM User "
