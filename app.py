@@ -1,3 +1,10 @@
+#how to run:
+
+# 1) cd to folder with project
+# 2) export FLASK_APP=app.py
+# 3) flash run
+#
+
 from flask import Flask, request, render_template, url_for, logging, session, flash, redirect
 import pymysql
 from passlib.hash import sha256_crypt
@@ -168,7 +175,7 @@ def is_admin(f):
 def is_passenger(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        if 'passenger' in session:
+        if session['admin'] == False:
             return f(*args, **kwargs)
         else:
             flash ('Requires passenger access.', 'danger')
@@ -195,11 +202,11 @@ def passenger():
 def admin():
     return render_template('admin.html')
 
-@app.route('/admin/station-management')
+@app.route('/station-management')
 def station_management():
     return render_template('station_management.html')
 
-@app.route('/station-management/create-station')
+@app.route('/create-station')
 def create_station():
     return render_template('create_station.html')
 
@@ -218,7 +225,7 @@ def station_detail(id):
 def suspended_cards():
     return render_template('suspended_cards.html')
 
-@app.route('/admin/card-management')
+@app.route('/card-management-admin')
 @is_logged_in
 @is_admin
 def card_management_admin():
@@ -229,7 +236,7 @@ def card_management_admin():
 def flow_report():
     return render_template('flow_report.html')
 
-@app.route('/passenger/card-management')
+@app.route('/passenger/card-management-passenger')
 @is_logged_in
 @is_passenger
 def card_management_passenger():
