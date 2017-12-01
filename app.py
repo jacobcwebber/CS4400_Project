@@ -49,7 +49,7 @@ class RegisterForm(Form):
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
-    form = RegisterForm(request.form)x`
+    form = RegisterForm(request.form)
 
     if request.method == 'POST' and form.validate():
         username = form.username.data
@@ -86,7 +86,7 @@ def login():
         username = request.form['username']
         password_attempt = request.form['password']
 
-            cur = connection.cursor()
+        cur = connection.cursor()
 
         result = cur.execute("SELECT * "
                              "FROM User "
