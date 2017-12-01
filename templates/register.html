@@ -28,11 +28,13 @@ $("input[type='radio']").change(function() {
 
     if($(this).val()=="existing")
     {
+        $("#number").val("");
         $("#number").show();
     }
     else
     {
         $("#number").hide();
+        $("#number").val("1111111111111111");
     }
 });
 </script>
