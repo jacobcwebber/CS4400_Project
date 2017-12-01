@@ -1,5 +1,17 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<p>This is the suspended cards page.</p>
+<div class="login-page">
+    <div class="form">
+        <h1>Suspended Cards</h1>
+        <div class="admin-form">
+            <form method="post">
+                <a class='btn btn-primary'>Assign Selected Card to New Owner</a>
+            </form> <p></p>
+            <form method="post">
+                <a class='btn btn-primary'>Assign Selected Card to Previous Owner</a>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

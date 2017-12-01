@@ -1,6 +1,18 @@
 {% extends 'layout.html'%}
 
 {% block body %}
-<p>This is the station management page.</p>
+<div class="login-page">
+    <div class="form">
+        <h2>Station Management</h2>
+        <p>This is where the table will go.</p>
+        <div class="admin-form">
+            <form method="get">
+                <a href="/create-station" class='btn btn-primary'>Create New Station</a>
+            </form> <p></p>
+            <form method="get">
+                <a href="/station-detail/<string:id>/" class='btn btn-primary'>View Station</a>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
-

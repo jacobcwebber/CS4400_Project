@@ -1,14 +1,26 @@
-#how to run:
-
+# How to run if you're Brett:
 # 1) cd to folder with project
 # 2) export FLASK_APP=app.py
 # 3) flash run
 #
+# Otherwise:
+# 1) cd to folder with project
+# 2) python app.py
+#
+# How to access DB:
+# 1) In putty > host is academic-mysql.cc.gatech.edu
+# 2) your gt username and password
+# 3) mysql -u cs4400_Group_8 -p
+# 4) i8vZtVC5
+# 5) use cs4400_Group_8
+
+##########################################################
+##########################################################
 
 from flask import Flask, request, render_template, url_for, logging, session, flash, redirect
 import pymysql
-from passlib.hash import sha256_crypt
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators, ValidationError, IntegerField, RadioField
+from passlib.hash import md5_crypt
+from wtforms import Form, BooleanField, StringField, TextAreaField, PasswordField, validators, ValidationError, IntegerField, RadioField
 from functools import wraps
 import re
 from random import randint
@@ -66,7 +78,7 @@ def register():
     if request.method == 'POST' and form.validate():
         username = form.username.data
         email = form.email.data
-        password = sha256_crypt.encrypt(str(form.password.data))
+        password = md5_crypt.encrypt(str(form.password.data))
         number = int(form.breezecard.data)
 
         cur = connection.cursor()
@@ -119,7 +131,7 @@ def login():
             password = data['Password']
 
             #checks if passwords match and logs you in if they do
-            if sha256_crypt.verify(password_attempt, password):
+            if md5_crypt.verify(password_attempt, password):
                 session['logged_in'] = True
                 session['username'] = username
 
@@ -225,11 +237,22 @@ def station_detail(id):
 def suspended_cards():
     return render_template('suspended_cards.html')
 
+class AdminCardManagementForm(Form):
+    owner = StringField('')
+    number = StringField('')
+    value_lower = StringField('')
+    value_upper = StringField('')
+    show_suspended = BooleanField('')
+    set_value = StringField('')
+    transfer_to = StringField('')
+
 @app.route('/card-management-admin')
 @is_logged_in
 @is_admin
 def card_management_admin():
-    return render_template('card_management_admin.html')
+    form = AdminCardManagementForm(request.form)
+
+    return render_template('card_management_admin.html', form=form)
 
 @app.route('/flow-report')
 @is_logged_in

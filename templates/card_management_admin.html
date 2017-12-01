@@ -1,5 +1,25 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<p>This is the Admin Card Management page.</p>
-{% endblock %}
+<div class="login-page">
+    <div class="form">
+        <h1>Breezecard Management</h1>
+        {% from "includes/_formhelpers.html" import render_field %}
+        <div class="admin-form">
+            <p>Owner: {{render_field(form.owner, class_="form-control")}}</p>
+            <p>Card Number: {{render_field(form.number, class_="form-control")}}</p>
+            <a class='btn btn-primary'>Reset Card Number</a>
+            <p>Value between: {{render_field(form.value_upper, class_="form-control")}} and {{render_field(form.value_lower, class_="form-control")}}</p>
+            <a class='btn btn-primary'>Update Filter</a> <p></p>
+            <b>THE TABLE WILL GO HERE</b>
+            <p>Set Value of Selected Card to: {{render_field(form.set_value, class_="form-control")}}</p>
+            <p>Transfer Selected Card to: {{render_field(form.transfer_to, class_="form-control")}}</p>
+            <form method="post">
+                <a class='btn btn-primary'>Assign Selected Card to New Owner</a>
+            </form> <p></p>
+            <form method="post">
+                <a class='btn btn-primary'>Assign Selected Card to Previous Owner</a>
+            </form>
+        </div>
+    </div>
+</div>{% endblock %}
