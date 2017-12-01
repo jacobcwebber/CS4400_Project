@@ -224,7 +224,7 @@ class CreateStationForm(Form):
     stopId = StringField('')
     fare = StringField('')
     typeRadio = RadioField('', choices=[('train', 'Train Station'), ('bus', 'Bus Station')])
-    intersection = StringField('')
+    intersection = StringField('', render_kw={"placeholder": "Nearest intersection"})
     openStation = BooleanField('')
 
 @app.route('/create-station')
@@ -233,15 +233,24 @@ def create_station():
 
     return render_template('create_station.html', form=form)
 
+class StationDetailForm(Form):
+    fare = StringField('')
+    openStation = BooleanField('')
+
 @app.route('/station-detail/<string:id>/')
 @is_logged_in
 @is_admin
 def station_detail(id):
-    cur = connection.cursor()
-    result = cur.execute("SELECT * FROM stations WHERE id = %s", [id])
-    station = result.fetchone()
+    form = StationDetailForm(request.form)
 
-    return render_template('station_detail.html', id=station)
+    cur = connection.cursor()
+    result = cur.execute("SELECT * FROM Station s LEFT OUTER JOIN BusStation b "
+                         "ON s.StopID = b.StopID "
+                         "WHERE s.StopID = %s"
+                         , [id])
+    station = cur.fetchone()
+
+    return render_template('station_detail.html', form=form, station=station)
 
 @app.route('/suspended-cards')
 @is_logged_in
