@@ -219,9 +219,19 @@ def admin():
 def station_management():
     return render_template('station_management.html')
 
+class CreateStationForm(Form):
+    name = StringField('')
+    stopId = StringField('')
+    fare = StringField('')
+    stationType = RadioField('', choices=['Train Station', 'Bus Station'])
+    intersection = StringField('')
+    openStation = BooleanField('')
+
 @app.route('/create-station')
 def create_station():
-    return render_template('create_station.html')
+    form = CreateStationForm(request.form)
+
+    return render_template('create_station.html', form=form)
 
 @app.route('/station-detail/<string:id>/')
 @is_logged_in
@@ -255,10 +265,17 @@ def card_management_admin():
 
     return render_template('card_management_admin.html', form=form)
 
+class FlowReportForm(Form):
+    start = StringField('')
+    end = StringField('')
+
 @app.route('/flow-report')
 @is_logged_in
+@is_admin
 def flow_report():
-    return render_template('flow_report.html')
+    form = FlowReportForm(request.form)
+
+    return render_template('flow_report.html', form=form)
 
 @app.route('/passenger/card-management-passenger')
 @is_logged_in

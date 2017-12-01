@@ -1,5 +1,54 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<p>This is the Flow Report page.</p>
+<div class="panel panel-default h-v-center" style="width: 550px">
+    <div class="panel-heading"><b>Flow Report</b></div>
+    <div class="panel-body">
+        {% from "includes/_formhelpers.html" import render_field %}
+        <form class="form-inline">
+            <div class="form-group" style="width: 100%">
+                <span style="display: inline-block; width: 100px">Start time:</span>
+                {{render_field(form.start, class_="form-control input-sm")}}
+                <a class='btn btn-primary btn-sm' style="float: right; width: 80px;">Update</a> <p></p>
+            </div>
+            <div class="form-group" style="width: 100%">
+                <span style="display: inline-block; width: 100px">End time:</span>
+                {{render_field(form.end, class_="form-control input-sm")}}
+                <a class='btn btn-primary btn-sm' style="float: right; width: 80px;">Reset</a> <p></p>
+            </div>
+        </form>
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <th>Station Name</th>
+                    <th># Passengers In</th>
+                    <th># Passengers Out</th>
+                    <th>Flow</th>
+                    <th>Revenue</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Station 1</td>
+                        <td>500</td>
+                        <td>600</td>
+                        <td>-100</td>
+                        <td>$500.00</td>
+                    </tr>
+                    <tr>
+                        <td>Station 2</td>
+                        <td>750</td>
+                        <td>500</td>
+                        <td>250</td>
+                        <td>$1250.00</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+    </div>
+</div>
 {% endblock %}

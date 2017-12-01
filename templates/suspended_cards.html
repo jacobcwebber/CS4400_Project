@@ -1,36 +1,38 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<center><div class="jumbotron" style="width: 700px">
-    <div class="form">
-        <h2>Suspended Cards</h2>
-        <table class="table table-hover">
-            <tr class="header">
+<div class="panel panel-default h-v-center" style="width: 700px">
+    <div class="panel-heading"><b>Suspended Cards</b></div>
+    <div class="panel-body">
+        <table class="table table-bordered table-hover">
+            <thead>
                 <th>Card #</th>
                 <th>New Owner</th>
                 <th>Date Suspended</th>
                 <th>Previous Owner</th>
-            </tr>
-            <tr>
-                <td>1523 5548 9685 4475</td>
-                <td>Kevin</td>
-                <td>11/30/2017</td>
-                <td>Jacob</td>
-            </tr>
-            <tr>
-                <td>7548 1126 0027 5123</td>
-                <td>Brett</td>
-                <td>12/1/2017</td>
-                <td>Kevin</td>
-            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1523 5548 9685 4475</td>
+                    <td>Kevin</td>
+                    <td>11/30/2017</td>
+                    <td>Jacob</td>
+                </tr>
+                <tr>
+                    <td>7548 1126 0027 5123</td>
+                    <td>Brett</td>
+                    <td>12/1/2017</td>
+                    <td>Kevin</td>
+                </tr>
+            </tbody>
         </table>
-        <form method="post">
-            <a class='btn btn-primary'>Assign Selected Card to New Owner</a>
-        </form> <p></p>
-        <form method="post">
-            <a class='btn btn-primary'>Assign Selected Card to Previous Owner</a>
-        </form>
-        <p></p>
-    <div style="font-size: 12px;">Assigning the card to an Owner will unlock all accounts conflicted on the same Breezecard</div>
-</div></center>
+        <center>
+            <form method="post">
+                <a class='btn btn-primary'>Assign Selected Card to New Owner</a>
+            </form> <p></p>
+            <form method="post">
+                <a class='btn btn-primary'>Assign Selected Card to Previous Owner</a>
+            </form> <p></p>
+            <div style="font-size: 12px;">Assigning the card to an Owner will unlock all accounts conflicted on the same Breezecard</div>
+        </center>
 {% endblock %}

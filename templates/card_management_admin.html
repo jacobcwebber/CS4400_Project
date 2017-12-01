@@ -1,56 +1,65 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="panel panel-default h-v-center" style="width: 600px">
-    <div class="panel-heading"><b>Manage Breezecards</b></div>
+<div class="panel panel-default h-v-center" style="width: 650px">
+    <div class="panel-heading"><b>Breezecard Management</b></div>
     <div class="panel-body">
     {% from "includes/_formhelpers.html" import render_field %}
     <form class="form-inline">
         <div class="form-group">
-            <span>Owner:</span>
+            <span style="display: inline-block; width: 100px">Owner:</span>
             {{render_field(form.owner, class_="form-control input-sm")}}
             <span class="custom-control custom-checkbox">
                 <input type="checkbox" class="custom-control-input">
                 <span class="custom-control-indicator"></span>
-                <span class="custom-control-description">Show suspended cards</span>
+                <span class="custom-control-description">Show suspended cards</span><p></p>
             </span>
         </div>
         <div class="form-group">
-            <span>Card Number:</span>
+            <span style="display: inline-block; width: 100px">Card number:</span>
             {{render_field(form.number, class_="form-control input-sm")}}
-            <a class='btn btn-primary btn-sm'>Reset</a>
+            <a class='btn btn-primary btn-sm'>Reset</a><p></p>
         </div>
         <div class="form-group">
-            <span>Value between:</span>
-            {{render_field(form.value_upper, class_="form-control input-sm")}}
+            <span style="display: inline-block; width: 100px">Value between:</span>
+            {{render_field(form.value_upper, style="width: 66px", class_="form-control input-sm")}}
             <span>and</span>
-            {{render_field(form.value_lower, class_="form-control input-sm")}}
+            {{render_field(form.value_lower, style="width: 66px", class_="form-control input-sm")}}
             <a class='btn btn-primary btn-sm'>Update Filter</a> <p></p>
         </div>
-        <table class="table table-hover">
-            <tr class="header">
+    </form>
+    <form class="form-inline">
+        <table class="table table-bordered table-hover">
+            <thead>
                 <th>Card #</th>
                 <th>Value</th>
                 <th>Owner</th>
-            </tr>
-            <tr>
-                <td>1523 5548 9685 4475</td>
-                <td>$57.00</td>
-                <td>Kevin</td>
-            </tr>
-            <tr>
-                <td>7548 1126 0027 5123</td>
-                <td>$11.50</td>
-                <td>Brett</td>
-            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1523 5548 9685 4475</td>
+                    <td>$57.00</td>
+                    <td>Kevin</td>
+                </tr>
+                <tr>
+                    <td>7548 1126 0027 5123</td>
+                    <td>$11.50</td>
+                    <td>Brett</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
         </table>
         <div class="form-group">
             {{render_field(form.set_value, class_="form-control input-sm")}}
-            <a class="btn btn-primary btn-sm">Set Value of Selected Card </a>
+            <a class="btn btn-primary btn-sm" style="width: 165px;">Set Value of Selected Card </a><p></p>
         </div>
         <div class="form-group">
             {{render_field(form.transfer_to, class_="form-control input-sm")}}
-            <a class="btn btn-primary btn-sm">Transfer Selected Card</a>
+            <a class="btn btn-primary btn-sm" style="width: 165px;">Transfer Selected Card</a>
         </div>
     </form>
     </div>
