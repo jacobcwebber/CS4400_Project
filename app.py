@@ -4,6 +4,7 @@ from passlib.hash import sha256_crypt
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, ValidationError, IntegerField, RadioField
 from functools import wraps
 import re
+from random import randint
 
 app = Flask(__name__)
 
@@ -34,7 +35,7 @@ class RegisterForm(Form):
         validators.EqualTo('confirm', message='Passwords do not match')],
         render_kw={"placeholder": "password"})
     confirm = PasswordField('', render_kw={"placeholder": "confirm password"})
-    breezecard = IntegerField('', render_kw={"placeholder": "breezecard number"})
+    breezecard = StringField('', render_kw={"placeholder": "breezecard number"})
 
     #custom validation using regex for ensuring email address is valid
     def validate_email(form, field):
@@ -44,18 +45,22 @@ class RegisterForm(Form):
             raise ValidationError('Please submit a valid email')
 
     def validate_breezecard(form, field):
+        try:
+            int(field.data)
+        except:
+            raise ValidationError('Breezecard Number must be an integer.')
         if len(str(field.data)) != 16:
             raise ValidationError('Breezecard Number must be 16 digits')
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
-    form = RegisterForm(request.form)x`
+    form = RegisterForm(request.form)
 
     if request.method == 'POST' and form.validate():
         username = form.username.data
         email = form.email.data
         password = sha256_crypt.encrypt(str(form.password.data))
-        number = form.breezecard.data
+        number = int(form.breezecard.data)
 
         cur = connection.cursor()
 
@@ -66,11 +71,20 @@ def register():
             flash('This username is already taken. Please try again.', 'danger')
             return redirect(url_for('register'))
 
-        try:
-            cur.execute("INSERT INTO Breezecard(BreezecardNum, Value, Owner) VALUES(%s, %s, %s)", (number, 0.00, username))
-        except pymysql.IntegrityError:
-            flash('This Breezecard Number is already taken. Please try again.', 'danger')
-            return redirect(url_for('register'))
+        #used to distinguish between "new" and "existing" buzzcard
+        if request.form['options'] == 'existing':
+            try:
+                cur.execute("INSERT INTO Breezecard(BreezecardNum, Value, Owner) VALUES(%s, %s, %s)", (number, 0.00, username))
+            except pymysql.IntegrityError:
+                flash('This Breezecard Number is already taken. Please try again.', 'danger')
+                return redirect(url_for('register'))
+        else:
+            number = randint(0000000000000000, 9999999999999999)
+            try:
+                cur.execute("INSERT INTO Breezecard(BreezecardNum, Value, Owner) VALUES(%s, %s, %s)", (number, 0.00, username))
+            except pymysql.IntegrityError:
+                flash('This Breezecard Number is already taken. Please try again.', 'danger')
+                return redirect(url_for('register'))
 
         connection.commit()
         cur.close()
@@ -86,7 +100,7 @@ def login():
         username = request.form['username']
         password_attempt = request.form['password']
 
-            cur = connection.cursor()
+        cur = connection.cursor()
 
         result = cur.execute("SELECT * "
                              "FROM User "
