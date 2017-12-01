@@ -223,7 +223,7 @@ class CreateStationForm(Form):
     name = StringField('')
     stopId = StringField('')
     fare = StringField('')
-    stationType = RadioField('', choices=['Train Station', 'Bus Station'])
+    typeRadio = RadioField('', choices=[('train', 'Train Station'), ('bus', 'Bus Station')])
     intersection = StringField('')
     openStation = BooleanField('')
 
