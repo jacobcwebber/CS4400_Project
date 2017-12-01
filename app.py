@@ -50,6 +50,7 @@ class RegisterForm(Form):
         render_kw={"placeholder": "username"})
     email = StringField('', render_kw={"placeholder": "email"})
     password = PasswordField('', [
+        validators.Length(min=8, message="Password must be at least 8 digits long."),
         validators.DataRequired(),
         validators.EqualTo('confirm', message='Passwords do not match')],
         render_kw={"placeholder": "password"})

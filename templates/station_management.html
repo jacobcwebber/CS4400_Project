@@ -1,18 +1,33 @@
 {% extends 'layout.html'%}
 
 {% block body %}
-<div class="login-page">
-    <div class="form">
+<center><div class="jumbotron" style="width: 600px">
         <h2>Station Management</h2>
-        <p>This is where the table will go.</p>
-        <div class="admin-form">
-            <form method="get">
-                <a href="/create-station" class='btn btn-primary'>Create New Station</a>
-            </form> <p></p>
-            <form method="get">
-                <a href="/station-detail/<string:id>/" class='btn btn-primary'>View Station</a>
-            </form>
-        </div>
-    </div>
-</div>
+        <table class="table table-hover">
+            <tr class="header">
+                <th>Station Name</th>
+                <th>Stop ID</th>
+                <th>Fare</th>
+                <th>Status</th>
+            </tr>
+            <tr>
+                <td>Station 1</td>
+                <td>1</td>
+                <td>$500</td>
+                <td>Open</td>
+            </tr>
+            <tr>
+                <td>Station 2</td>
+                <td>2</td>
+                <td>$100</td>
+                <td>Closed</td>
+            </tr>
+        </table>
+        <form method="get">
+            <a href="/create-station" class='btn btn-primary'>Create New Station</a>
+        </form>
+        <form method="get">
+            <a href="/station-detail/<string:id>/" class='d-inline btn btn-primary'>View Station</a>
+        </form>
+</div></center>
 {% endblock %}
