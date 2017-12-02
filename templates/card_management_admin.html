@@ -5,7 +5,7 @@
     <div class="panel-heading"><b>Breezecard Management</b></div>
     <div class="panel-body">
     {% from "includes/_formhelpers.html" import render_field %}
-    <form class="form-inline">
+    <form method="POST" action="" class="form-inline">
         <div class="form-group">
             <span style="display: inline-block; width: 100px">Owner:</span>
             {{render_field(form.owner, class_="form-control input-sm")}}
@@ -28,7 +28,7 @@
             <a class='btn btn-primary btn-sm'>Update Filter</a> <p></p>
         </div>
     </form>
-    <form class="form-inline">
+    <form method="POST" action="" class="form-inline">
         <table class="table table-bordered table-hover">
             <thead>
                 <th>Card #</th>
