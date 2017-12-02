@@ -1,5 +1,58 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<p>This is the Passenger Card Management page.</p>
+<div class="panel panel-default h-v-center" style="width: 500px">
+    <div class="panel-heading"><b>Manage Cards</b></div>
+    <div class="panel-body">
+    {% from "includes/_formhelpers.html" import render_field %}
+        <label>Breeze Cards</label>
+        <div class="form-group">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <th>Card Number</th>
+                    <th>Value</th>
+                    <th></th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1523 5548 9685 4475</td>
+                        <td>$57.00</td>
+                        <td><a>Remove</a></td>
+                    </tr>
+                    <tr>
+                        <td>7548 1126 0027 5123</td>
+                        <td>$11.50</td>
+                        <td><a>Remove</a></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div> <p></p>
+        <form class="form-inline">
+            <div class="form-group">
+                {{render_field(form.number, class_="form-control input-sm")}}
+                <a class='btn btn-primary btn-sm'>Add Card</a><p></p>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">Add Value to Selected Card</div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <span style="display: inline-block; width: 90px;">Credit Card #</span>
+                        {{render_field(form.creditCard, class_="form-control input-sm")}} <p></p>
+                    </div>
+                    <div class="form-group" style="width: 100%">
+                        <span style="display: inline-block; width: 90px;">Value</span>
+                        {{render_field(form.value, class_="form-control input-sm")}}
+                        <a class='btn btn-primary btn-sm' style="float: right">Add Value</a><p></p>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    </div>
+</div>
 {% endblock %}
