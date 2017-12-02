@@ -10,8 +10,8 @@
 # 4) i8vZtVC5
 # 5) use cs4400_Group_8
 
-##########################################################
-##########################################################
+################################################################################
+################################################################################
 
 from flask import Flask, request, render_template, url_for, logging, session, flash, redirect
 import pymysql
@@ -215,8 +215,8 @@ class PassengerForm(Form):
     for station in stations:
         endStationsList.append((station['StopID'], station['Name']))
 
-    start = SelectField('StartsAt', choices=startStationsList)
-    end = SelectField('EndsAt', choices=endStationsList)
+    start = SelectField('', choices=startStationsList)
+    end = SelectField('', choices=endStationsList)
 
 @app.route('/passenger')
 @is_logged_in
@@ -318,16 +318,22 @@ def flow_report():
 
     return render_template('flow_report.html', form=form)
 
-@app.route('/passenger/card-management-passenger')
+@app.route('/card-management-passenger')
 @is_logged_in
 @is_passenger
 def card_management_passenger():
     return render_template('card_management_passenger.html')
 
-@app.route('/trip-history/<string:id>/')
+class TripHistoryForm(Form):
+    start = StringField('')
+    end = StringField('')
+
+@app.route('/trip-history')
 @is_logged_in
 def trip_history():
-    return render_template('trip_history.html')
+    form = TripHistoryForm(request.form)
+
+    return render_template('trip_history.html', form=form)
 
 @app.errorhandler(404)
 def not_found(error):
