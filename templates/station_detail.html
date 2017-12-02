@@ -10,7 +10,7 @@
             <span style="float: right;">Stop {{ station.StopID }}</span>
             <p></p>
         </div>
-        <form class="form-inline">
+        <form method="POST" action="" class="form-inline">
             <div class="form-group">
                 <span style="display: inline-block; width: 100px">Fare</span>
                 {{render_field(form.fare, style="width: 100px", class_="form-control input-sm")}}

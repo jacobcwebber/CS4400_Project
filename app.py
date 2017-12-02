@@ -217,7 +217,7 @@ class PassengerForm(Form):
     start = SelectField('', choices=startStationsList)
     end = SelectField('', choices=endStationsList)
 
-@app.route('/passenger')
+@app.route('/passenger' method= ['POST', 'GET'])
 @is_logged_in
 @is_passenger
 def passenger():
@@ -318,7 +318,7 @@ class StationDetailForm(Form):
     fare = StringField('')
     openStation = BooleanField('')
 
-@app.route('/station-detail/<string:id>/')
+@app.route('/station-detail/<string:id>/', methods=['POST', 'GET'])
 @is_logged_in
 @is_admin
 def station_detail(id):
@@ -333,7 +333,7 @@ def station_detail(id):
 
     return render_template('station_detail.html', form=form, station=station)
 
-@app.route('/suspended-cards')
+@app.route('/suspended-cards'method=['POST', 'GET'])
 @is_logged_in
 def suspended_cards():
     return render_template('suspended_cards.html')
@@ -347,7 +347,7 @@ class AdminCardManagementForm(Form):
     set_value = StringField('')
     transfer_to = StringField('')
 
-@app.route('/card-management-admin')
+@app.route('/card-management-admin' method = ['POST', 'GET'])
 @is_logged_in
 @is_admin
 def card_management_admin():
@@ -372,7 +372,7 @@ class PassengerCardManagementForm(Form):
     creditCard = StringField('')
     value = StringField('')
 
-@app.route('/card-management-passenger')
+@app.route('/card-management-passenger' methods = ['POST', 'GET'])
 @is_logged_in
 @is_passenger
 def card_management_passenger():
