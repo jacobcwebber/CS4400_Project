@@ -1,11 +1,7 @@
-# How to run if you're Brett:
-# 1) cd to folder with project
-# 2) export FLASK_APP=app.py
-# 3) flash run
-#
-# Otherwise:
+# How to run:
 # 1) cd to folder with project
 # 2) python app.py
+# 3) Go to 127.0.0.1:5000
 #
 # How to access DB:
 # 1) In putty > host is academic-mysql.cc.gatech.edu
@@ -200,7 +196,7 @@ def is_passenger(f):
 @is_logged_in
 def logout():
     session.clear()
-    flash('You are now logged out', 'success')
+    flash('You are now logged out.', 'success')
     return redirect(url_for('index'))
 
 @app.route('/passenger')
