@@ -4,28 +4,30 @@
 <div class="panel panel-default h-v-center" style="width: 600px">
     <div class="panel-heading"><b>Station Management</b></div>
     <div class="panel-body">
-        <table class="table table-bordered table-hover">
-            <thead class="thead-inverse">
-                <th>Station Name</th>
-                <th>Stop ID</th>
-                <th>Fare</th>
-                <th>Status</th>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Station 1</td>
-                    <td>1</td>
-                    <td>$500</td>
-                    <td>Open</td>
-                </tr>
-                <tr>
-                    <td>Station 2</td>
-                    <td>2</td>
-                    <td>$100</td>
-                    <td>Closed</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="station-table">
+                <thead class="thead-inverse">
+                    <th>Station Name</th>
+                    <th>Stop ID</th>
+                    <th>Fare</th>
+                    <th>Status</th>
+                </thead>
+                <tbody>
+                    {% for station in stations %}
+                    <tr class="clickable-row">
+                        <td>{{ station.Name }}</td>
+                        <td>{{ station.StopID }}</td>
+                        <td>{{ station.EnterFare }}</td>
+                        {% if station.ClosedStatus == 0 %}
+                            <td>Open</td>
+                        {% elif station.ClosedStatus == 1%}
+                            <td>Closed</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         <center>
             <form method="get">
                 <a href="/create-station" class='btn btn-primary' style="width: 120px">Create Station</a>
@@ -35,4 +37,9 @@
             </form>
         </center>
     </div>
+<script>
+    $('#station-table').on('click', '.clickable-row', function(event) {
+        $(this).addClass('active').siblings().removeClass('active');
+    });
+</script>
 {% endblock %}
