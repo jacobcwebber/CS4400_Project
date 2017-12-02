@@ -1,14 +1,22 @@
-#how to run:
-
+# How to run:
 # 1) cd to folder with project
-# 2) export FLASK_APP=app.py
-# 3) flash run
+# 2) python app.py
+# 3) Go to 127.0.0.1:5000
 #
+# How to access DB:
+# 1) In putty > host is academic-mysql.cc.gatech.edu
+# 2) your gt username and password
+# 3) mysql -u cs4400_Group_8 -p
+# 4) i8vZtVC5
+# 5) use cs4400_Group_8
+
+##########################################################
+##########################################################
 
 from flask import Flask, request, render_template, url_for, logging, session, flash, redirect
 import pymysql
-from passlib.hash import sha256_crypt
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators, ValidationError, IntegerField, RadioField
+from passlib.hash import md5_crypt
+from wtforms import Form, BooleanField, StringField, TextAreaField, PasswordField, validators, ValidationError, IntegerField, RadioField
 from functools import wraps
 import re
 from random import randint
@@ -38,6 +46,7 @@ class RegisterForm(Form):
         render_kw={"placeholder": "username"})
     email = StringField('', render_kw={"placeholder": "email"})
     password = PasswordField('', [
+        validators.Length(min=8, message="Password must be at least 8 digits long."),
         validators.DataRequired(),
         validators.EqualTo('confirm', message='Passwords do not match')],
         render_kw={"placeholder": "password"})
@@ -66,7 +75,7 @@ def register():
     if request.method == 'POST' and form.validate():
         username = form.username.data
         email = form.email.data
-        password = sha256_crypt.encrypt(str(form.password.data))
+        password = md5_crypt.encrypt(str(form.password.data))
         number = int(form.breezecard.data)
 
         cur = connection.cursor()
@@ -119,7 +128,7 @@ def login():
             password = data['Password']
 
             #checks if passwords match and logs you in if they do
-            if sha256_crypt.verify(password_attempt, password):
+            if md5_crypt.verify(password_attempt, password):
                 session['logged_in'] = True
                 session['username'] = username
 
@@ -187,7 +196,7 @@ def is_passenger(f):
 @is_logged_in
 def logout():
     session.clear()
-    flash('You are now logged out', 'success')
+    flash('You are now logged out.', 'success')
     return redirect(url_for('index'))
 
 @app.route('/passenger')
@@ -206,35 +215,72 @@ def admin():
 def station_management():
     return render_template('station_management.html')
 
+class CreateStationForm(Form):
+    name = StringField('')
+    stopId = StringField('')
+    fare = StringField('')
+    typeRadio = RadioField('', choices=[('train', 'Train Station'), ('bus', 'Bus Station')])
+    intersection = StringField('', render_kw={"placeholder": "Nearest intersection"})
+    openStation = BooleanField('')
+
 @app.route('/create-station')
 def create_station():
-    return render_template('create_station.html')
+    form = CreateStationForm(request.form)
+
+    return render_template('create_station.html', form=form)
+
+class StationDetailForm(Form):
+    fare = StringField('')
+    openStation = BooleanField('')
 
 @app.route('/station-detail/<string:id>/')
 @is_logged_in
 @is_admin
 def station_detail(id):
-    cur = connection.cursor()
-    result = cur.execute("SELECT * FROM stations WHERE id = %s", [id])
-    station = result.fetchone()
+    form = StationDetailForm(request.form)
 
-    return render_template('station_detail.html', id=station)
+    cur = connection.cursor()
+    result = cur.execute("SELECT * FROM Station s LEFT OUTER JOIN BusStation b "
+                         "ON s.StopID = b.StopID "
+                         "WHERE s.StopID = %s"
+                         , [id])
+    station = cur.fetchone()
+
+    return render_template('station_detail.html', form=form, station=station)
 
 @app.route('/suspended-cards')
 @is_logged_in
 def suspended_cards():
     return render_template('suspended_cards.html')
 
+class AdminCardManagementForm(Form):
+    owner = StringField('')
+    number = StringField('')
+    value_lower = StringField('')
+    value_upper = StringField('')
+    show_suspended = BooleanField('')
+    set_value = StringField('')
+    transfer_to = StringField('')
+
 @app.route('/card-management-admin')
 @is_logged_in
 @is_admin
 def card_management_admin():
-    return render_template('card_management_admin.html')
+    form = AdminCardManagementForm(request.form)
+
+    return render_template('card_management_admin.html', form=form)
+
+class FlowReportForm(Form):
+    start = StringField('')
+    end = StringField('')
 
 @app.route('/flow-report')
 @is_logged_in
+@is_admin
 def flow_report():
-    return render_template('flow_report.html')
+    form = FlowReportForm(request.form)
+
+    return render_template('flow_report.html', form=form)
 
 @app.route('/passenger/card-management-passenger')
 @is_logged_in

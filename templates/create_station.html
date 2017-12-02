@@ -1,5 +1,44 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<p>This is the Station Creation page.</p>
+<div class="panel panel-default h-v-center" style="width: 350px">
+    <div class="panel-heading"><b>Create Station</b></div>
+    <div class="panel-body">
+    {% from "includes/_formhelpers.html" import render_field %}
+    <form class="form-inline">
+        <div class="form-group">
+            <span style="display: inline-block; width: 100px">Station Name</span>
+            {{render_field(form.name, style="width: 200px", class_="form-control input-sm")}} <p></p>
+        </div>
+        <div class="form-group">
+            <span style="display: inline-block; width: 100px">Stop ID</span>
+            {{render_field(form.stopId, style="width: 200px", class_="form-control input-sm")}} <p></p>
+        </div>
+        <div class="form-group">
+            <span style="display: inline-block; width: 100px">Entry Fare</span>
+            {{render_field(form.fare, style="width: 200px", class_="form-control input-sm")}} <p></p>
+        </div>
+        <div class="form-group">
+            <span style="display: inline-block; width: 100px">Station Type</span>
+                    <input id="typeRadio-0" name="typeRadio" type="radio" value="train">
+                    <span for="typeRadio-0">Train Station</span> <br>
+                    <span style="display: inline-block; width: 100px"></span>
+                    <input id="typeRadio-1" name="typeRadio" type="radio" value="bus">
+                    <span for="typeRadio-1">Bus Station</span> <br>
+                    <span style="display: inline-block; width: 100px"></span>
+                    {{render_field(form.intersection, style="width: 200px", class_="form-control input-sm")}}
+        </div>
+        <div class="form-group">
+            <span class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input">
+                <span class="custom-control-indicator"></span>
+                <span class="custom-control-description">Open station</span> <br>
+                <span><small>When checked, passengers can enter at this station.</small></span>
+            </span>
+
+        </div>
+
+    </form>
+    </div>
+</div>
 {% endblock %}
