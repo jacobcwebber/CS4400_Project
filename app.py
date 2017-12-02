@@ -203,7 +203,6 @@ class PassengerForm(Form):
     cur = connection.cursor()
     cur.execute("SELECT StopID, Name, EnterFare "
                 "FROM Station")
-
     stations = cur.fetchall()
     cur.close()
 
@@ -318,11 +317,18 @@ def flow_report():
 
     return render_template('flow_report.html', form=form)
 
+class PassengerCardManagementForm(Form):
+    number = StringField('')
+    creditCard = StringField('')
+    value = StringField('')
+
 @app.route('/card-management-passenger')
 @is_logged_in
 @is_passenger
 def card_management_passenger():
-    return render_template('card_management_passenger.html')
+    form = PassengerCardManagementForm(request.form)
+
+    return render_template('card_management_passenger.html', form=form)
 
 class TripHistoryForm(Form):
     start = StringField('')
