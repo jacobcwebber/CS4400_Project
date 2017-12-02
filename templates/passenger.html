@@ -1,40 +1,37 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-    <div class="login-page">
-        <div class="form">
-            <img src="{{url_for('static', filename='images/marta.png')}}">
-            <div>
-                <div class="p-form-unit">
-                    <p class="p-unit left">Breeze Card</p>
-                    <Select class="p-unit right">
-                        <option value="1">0000 0000 0000 0000</option>
-                        <option value="2">0000 0000 0000 0001</option>
-                    </Select>
-                </div>
-                <div class="p-form-unit">
-                    <p class="p-unit left">Balance</p>
-                    <p class="p-unit right">$15.00</p>
-                </div>
-                <div class="p-form-unit">
-                    <p class="p-unit left">Starting at</p>
-                    <p class="p-unit right">North Springs - $2.50</p>
-                    <p>Begin Trip</p>
-                </div>
-                <div class="p-form-unit">
-                    <p class="p-unit left">Ending at</p>
-                    <p class="p-unit right">Midtown</p>
-                    <p>End Trip</p>
-                </div>
-                <div class="messages">
-                    <p class="p-unit"><a type="submit">Manage cards</a></p>
-                    <p class="p-unit">|</p>
-                    <p class="p-unit"><a type="submit">View Trip History</a></p>
-                    <p class="p-unit">|</p>
-                    <p class="p-unit"><a type="submit">Log Out</a></p>
-                </div>
+<div class="panel h-v-center" style="width: 400px">
+    <div class="panel-heading"><b>Welcome to MARTA</b></div>
+    <div class="panel-body">
+        <form class="form-inline">
+
+            <div class="p-form-unit">
+                <p class="p-unit left">Breeze Card</p>
+                <Select class="p-unit right">
+                    <option value="1">0000 0000 0000 0000</option>
+                    <option value="2">0000 0000 0000 0001</option>
+                </Select>
+            </div>
+            <div class="p-form-unit">
+                <p class="p-unit left">Balance</p>
+                <p class="p-unit right">$15.00</p>
+            </div>
+            <div class="p-form-unit">
+                <p class="p-unit left">Starting at</p>
+                <p class="p-unit right">North Springs - $2.50</p>
+                <p>Begin Trip</p>
+            </div>
+            <div class="p-form-unit">
+                <p class="p-unit left">Ending at</p>
+                <p class="p-unit right">Midtown</p>
+                <p>End Trip</p>
+            </div>
+            <div class="messages">
+                <p class="p-unit"><a type="submit">Manage cards</a></p>
+                <p class="p-unit"><a type="submit">View Trip History</a></p>
             </div>
         </div>
     </div>
-    <script type="text/javascript" src="{{url_for('static', filename='js/admin.js')}}"></script>
+ </div>
 {% endblock %}
