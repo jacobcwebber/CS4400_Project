@@ -217,7 +217,7 @@ class PassengerForm(Form):
     start = SelectField('', choices=startStationsList)
     end = SelectField('', choices=endStationsList)
 
-@app.route('/passenger' method= ['POST', 'GET'])
+@app.route('/passenger', methods= ['POST', 'GET'])
 @is_logged_in
 @is_passenger
 def passenger():
