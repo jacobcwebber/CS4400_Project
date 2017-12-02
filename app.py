@@ -247,20 +247,70 @@ def admin():
     return render_template('admin.html')
 
 @app.route('/station-management')
+@is_logged_in
+@is_admin
 def station_management():
-    return render_template('station_management.html')
+    cur = connection.cursor()
+    cur.execute("SELECT * "
+                "FROM Station")
+
+    stations = cur.fetchall()
+    cur.close()
+
+    return render_template('station_management.html', stations=stations)
 
 class CreateStationForm(Form):
-    name = StringField('')
-    stopId = StringField('')
+    name = StringField('', [validators.DataRequired()])
+    stopId = StringField('', [
+        validators.DataRequired()])
     fare = StringField('')
-    typeRadio = RadioField('', choices=[('train', 'Train Station'), ('bus', 'Bus Station')])
+    isTrain = RadioField('', [
+        validators.DataRequired()],
+        choices=[(1, 'Train Station'), (0, 'Bus Station')])
     intersection = StringField('', render_kw={"placeholder": "Nearest intersection"})
-    openStation = BooleanField('')
+    closedStatus = BooleanField('')
 
-@app.route('/create-station')
+    def validate_fare(form, field):
+        try:
+            float(field.data)
+        except:
+            raise ValidationError('Fare must be a number.')
+
+@app.route('/create-station', methods=['POST', 'GET'])
+@is_logged_in
 def create_station():
     form = CreateStationForm(request.form)
+
+    if request.method == 'POST' and form.validate():
+        name = request.form['name']
+        stopId = request.form['stopId']
+        fare = request.form['fare']
+        isTrain = request.form['isTrain']
+        intersection = request.form['intersection']
+        try:
+            closedStatus = request.form['closedStatus']
+        except:
+            closedStatus = 0
+
+        cur = connection.cursor()
+
+        try:
+            cur.execute("INSERT INTO Station "
+                        "VALUES (%s, %s, %s, %s, %s)"
+                        , (stopId, name, fare, closedStatus, isTrain))
+        except pymysql.IntegrityError:
+            flash('This station already exists.', 'danger')
+            return redirect(url_for('station_management'))
+
+        if isTrain == 0:
+            cur.execute("INSERT INTO BusStation "
+                        "VALUES (%s, %s)"
+                        , (stopId, intersection))
+
+        cur.close()
+
+        flash('Your station has been created.', 'success')
+        return redirect(url_for('station_management'))
 
     return render_template('create_station.html', form=form)
 
