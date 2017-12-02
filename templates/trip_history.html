@@ -1,5 +1,61 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<p>This is the Trip History page.</p>
+<div class="panel panel-default h-v-center" style="width: 600px">
+    <div class="panel-heading"><b>Trip History</b></div>
+    <div class="panel-body">
+    {% from "includes/_formhelpers.html" import render_field %}
+    <form class="form-inline">
+        <div class="form-group">
+            <span style="display: inline-block; width: 100px">Start Time</span>
+            {{render_field(form.start, class_="form-control input-sm")}}
+        </div>
+        <div class="form-group">
+            <span style="display: inline-block; width: 100px">End Time</span>
+            {{render_field(form.end, class_="form-control input-sm")}}
+        </div>
+        <div class="form-group">
+            <span style="display: inline-block; width: 100px">Value between:</span>
+            {{render_field(form.value_upper, style="width: 66px", class_="form-control input-sm")}}
+            <span>and</span>
+            {{render_field(form.value_lower, style="width: 66px", class_="form-control input-sm")}}
+            <a class='btn btn-primary btn-sm'>Update Filter</a> <p></p>
+        </div>
+    </form>
+    <form class="form-inline">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <th>Card #</th>
+                <th>Value</th>
+                <th>Owner</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1523 5548 9685 4475</td>
+                    <td>$57.00</td>
+                    <td>Kevin</td>
+                </tr>
+                <tr>
+                    <td>7548 1126 0027 5123</td>
+                    <td>$11.50</td>
+                    <td>Brett</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="form-group">
+            {{render_field(form.set_value, class_="form-control input-sm")}}
+            <a class="btn btn-primary btn-sm" style="width: 165px;">Set Value of Selected Card </a><p></p>
+        </div>
+        <div class="form-group">
+            {{render_field(form.transfer_to, class_="form-control input-sm")}}
+            <a class="btn btn-primary btn-sm" style="width: 165px;">Transfer Selected Card</a>
+        </div>
+    </form>
+    </div>
+</div>
 {% endblock %}

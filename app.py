@@ -10,13 +10,13 @@
 # 4) i8vZtVC5
 # 5) use cs4400_Group_8
 
-##########################################################
-##########################################################
+################################################################################
+################################################################################
 
 from flask import Flask, request, render_template, url_for, logging, session, flash, redirect
 import pymysql
 from passlib.hash import md5_crypt
-from wtforms import Form, BooleanField, StringField, TextAreaField, PasswordField, validators, ValidationError, IntegerField, RadioField
+from wtforms import Form, SelectField, BooleanField, StringField, PasswordField, validators, ValidationError, RadioField
 from functools import wraps
 import re
 from random import randint
@@ -199,11 +199,47 @@ def logout():
     flash('You are now logged out.', 'success')
     return redirect(url_for('index'))
 
+class PassengerForm(Form):
+    cur = connection.cursor()
+    cur.execute("SELECT StopID, Name, EnterFare "
+                "FROM Station")
+
+    stations = cur.fetchall()
+    cur.close()
+
+    startStationsList = []
+    for station in stations:
+        startStationsList.append((station['StopID'], station['Name'] + ' - $' + str(station['EnterFare'])))
+
+    endStationsList = []
+    for station in stations:
+        endStationsList.append((station['StopID'], station['Name']))
+
+    start = SelectField('', choices=startStationsList)
+    end = SelectField('', choices=endStationsList)
+
 @app.route('/passenger')
 @is_logged_in
 @is_passenger
 def passenger():
-    return render_template('passenger.html')
+    form = PassengerForm(request.form)
+
+    cur = connection.cursor()
+    cur.execute("SELECT BreezecardNum, Value "
+                "FROM Breezecard "
+                "WHERE Owner = %s",
+                session['username'])
+
+    breezecards = cur.fetchall()
+    cur.close()
+
+    breezecardList = []
+    i = 1
+    for breezecard in breezecards:
+        breezecardList.append((i, breezecard['BreezecardNum']))
+        i += 1
+
+    return render_template('passenger.html', form=form)
 
 @app.route('/admin')
 @is_logged_in
@@ -282,16 +318,22 @@ def flow_report():
 
     return render_template('flow_report.html', form=form)
 
-@app.route('/passenger/card-management-passenger')
+@app.route('/card-management-passenger')
 @is_logged_in
 @is_passenger
 def card_management_passenger():
     return render_template('card_management_passenger.html')
 
-@app.route('/trip-history/<string:id>/')
+class TripHistoryForm(Form):
+    start = StringField('')
+    end = StringField('')
+
+@app.route('/trip-history')
 @is_logged_in
 def trip_history():
-    return render_template('trip_history.html')
+    form = TripHistoryForm(request.form)
+
+    return render_template('trip_history.html', form=form)
 
 @app.errorhandler(404)
 def not_found(error):

@@ -4,11 +4,11 @@
 <center><div class="panel h-v-center" style="width: 400px">
     <div class="panel-body">
         <img src="/static/images/marta.png" style="width: 300px">
-        <form class="login-form" method='POST' action="" style="width: 250px">
+        <form method='POST' action="" style="width: 250px">
             <input placeholder = "username" type="text" name="username" class="form-control" value={{request.form.username}}> <p></p>
             <input placeholder = "password" type="password" name="password" class="form-control" value={{request.form.password}}> <p></p>
-            <a class="btn btn-primary btn-lg" style="width: 100%">Login</a> <p></p>
-            <p class="message">Not registered? <a href="/register">Create an account</a></p>
+            <button class="btn btn-primary btn-lg" type="submit" style="width: 100%">Login</button> <p></p>
+            <p>Not registered? <a href="/register">Create an account</a></p>
         </form>
     </div>
  </div></center>
