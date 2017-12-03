@@ -4,12 +4,12 @@
 <div class="panel panel-default h-v-center" style="width: 700px">
     <div class="panel-heading"><b>Suspended Cards</b></div>
     <div class="panel-body">
-        <table id="suspended-cards-table" class="table table-bordered table-hover">
+        <table class="table table-bordered table-hover" id="suspended-cards-table-table" data-toggle="table" data-sort-order="desc">
             <thead>
-                <th>Card #</th>
-                <th>New Owner</th>
-                <th>Date Suspended</th>
-                <th>Previous Owner</th>
+                <th data-sortable="true">Card #</th>
+                <th data-sortable="true">New Owner</th>
+                <th data-sortable="true">Date Suspended</th>
+                <th data-sortable="true">Previous Owner</th>
             </thead>
             <tbody>
                {% for card in cards %}
@@ -21,7 +21,7 @@
                 </tr>
                 {% endfor %}
             </tbody>
-        </table>
+        </table> <p></p>
         <center>
             <form method="post" action = "">
                 <input id="new-owner-button" class="btn btn-primary" type="submit" name="action" value="Assign Selected Card to New Owner">

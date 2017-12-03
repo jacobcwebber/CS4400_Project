@@ -5,12 +5,12 @@
     <div class="panel-heading"><b>Station Management</b></div>
     <div class="panel-body">
         <div class="table-responsive" style="max-height: 300px;">
-            <table class="table table-bordered table-hover" id="station-table">
-                <thead class="thead-inverse">
-                    <th><b>Station Name</b> <i class="fa fa-fw fa-sort"></i></th>
-                    <th><b>Stop ID</b> <i class="fa fa-fw fa-sort"></i></th>
-                    <th><b>Fare</b> <i class="fa fa-fw fa-sort"></i></th>
-                    <th><b>Status</b> <i class="fa fa-fw fa-sort"></i></th>
+            <table class="table table-bordered table-hover" id="station-table" data-toggle="table" data-sort-order="desc">
+                <thead clas>
+                    <th data-sortable="true">Station Name</th>
+                    <th data-sortable="true">Stop ID</th>
+                    <th data-sortable="true">Fare</th>
+                    <th data-sortable="true">Status</th>
                 </thead>
                 <tbody>
                     {% for station in stations %}
