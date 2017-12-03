@@ -400,8 +400,13 @@ class AdminCardManagementForm(Form):
 @is_admin
 def card_management_admin():
     form = AdminCardManagementForm(request.form)
+    cur = connection.cursor()
+    cur.execute("SELECT * "
+                "FROM Breezecard "
+                "WHERE BreezecardNum NOT IN (SELECT BreezecardNum FROM Conflict)")
+    allCards = cur.fetchall()
 
-    return render_template('card_management_admin.html', form=form)
+    return render_template('card_management_admin.html', form=form, cards=allCards)
 
 class FlowReportForm(Form):
     start = StringField('')
@@ -412,8 +417,18 @@ class FlowReportForm(Form):
 @is_admin
 def flow_report():
     form = FlowReportForm(request.form)
+    cur = connection.cursor()
+    cur.execute("Select S.Name As Station, IFNULL(PIn.PassengersIn,0) AS InFlow, IFNULL(POut.PassengersOut,0) AS OutFlow, IFNULL(PIn.PassengersIN,0) - IFNULL(POut.PassengersOut,0) AS NetFlow, IFNULL(PIn.Revenue, 0) AS Revenue "
+                "FROM (Station as S "
+                "LEFT JOIN (SELECT DISTINCT StartsAt AS StartStation, COUNT(Fare) As PassengersIn, SUM(Fare) As Revenue "
+                "FROM Trip GROUP BY StartsAt) AS PIn ON S.StopID = PIn.StartStation) "
+                "LEFT JOIN (SELECT DISTINCT EndsAt AS EndStation, COUNT(Fare) As PassengersOut FROM Trip GROUP BY EndsAt) AS POut ON S.StopID = POut.EndStation "
+                "WHERE PIn.PassengersIn >0 OR POut.PassengersOut >0 ;")
 
-    return render_template('flow_report.html', form=form)
+    flowReport = cur.fetchall()
+    cur.close()
+
+    return render_template('flow_report.html', form=form, flowReport=flowReport)
 
 class PassengerCardManagementForm(Form):
     number = StringField('')
@@ -431,6 +446,7 @@ def card_management_passenger():
                 "WHERE Owner = %s AND BreezecardNum NOT IN (SELECT DISTINCT BreezecardNum FROM Conflict)"
                 ,session['username'])
     cards = cur.fetchall()
+    cur.close()
 
     if request.method == 'POST':
         if request.form['action'] == 'add-card':
