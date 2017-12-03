@@ -254,9 +254,12 @@ def beginTrip():
 
     cur.execute("INSERT INTO Trip (Fare, Breezecard, StartsAt, EndsAt)"
                 "VALUES (%s, %s, %s, %s)"
+<<<<<<< HEAD
                 , (float(fare), breezecard, startStation, None))
-
+=======
+                , (fare, breezecard, startStation, None))
     connection.commit()
+>>>>>>> 2eae66e34da11d8397717aff663790e29d555b79
     cur.close()
 
     return redirect(url_for('passenger'))
@@ -332,7 +335,7 @@ class CreateStationForm(Form):
         except:
             raise ValidationError('Fare must be a number.')
         if float(field.data) < 0 or float(field.data) > 50:
-            raise ValidationError('Fare must be between 0 and 50')
+            raise ValidationError('Fare must be between 0 and 50')    
 
 @app.route('/create-station', methods=['POST', 'GET'])
 @is_logged_in
@@ -486,7 +489,7 @@ def card_management_admin():
                     "WHERE BreezecardNum NOT IN (SELECT BreezecardNum FROM Conflict) "
                     "AND Owner LIKE %s AND BreezecardNum LIKE %s AND Value >= %s AND Value <= %s"
                     , ( ownerName, cardNumber, float(lowerValue), float(upperValue)))
-            allCards = cur.fetchall()
+            allCards = cur.fetchall() 
             if suspended == 1:
                 cur.execute("SELECT DISTINCT B.BreezecardNum, B.Value "
                             "FROM Breezecard AS B JOIN Conflict AS C "
@@ -495,8 +498,8 @@ def card_management_admin():
                 suspendedCards = cur.fetchall()
                 for card in suspendedCards:
                     card['Owner'] = 'Suspended'
-                if len(suspendedCards) > 0:
-                    allCards.extend(suspendedCards)
+                if len(suspendedCards) > 0:        
+                    allCards.extend(suspendedCards)        
         flash('Filter has been updated.', 'success')
         cur.close()
         return render_template('card_management_admin.html', form=form, cards=allCards)
