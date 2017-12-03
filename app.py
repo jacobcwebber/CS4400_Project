@@ -302,13 +302,13 @@ def station_management():
     return render_template('station_management.html', stations=stations)
 
 class CreateStationForm(Form):
-    name = StringField('', [validators.DataRequired()])
+    name = StringField('', [validators.InputRequired()])
     stopId = StringField('', [
-        validators.DataRequired()])
+        validators.InputRequired()])
     fare = StringField('')
     isTrain = RadioField('', [
-        validators.DataRequired()],
-        choices=[(1, 'Train Station'), (0, 'Bus Station')])
+        validators.InputRequired()],
+        choices=[('train', 'Train Station'), ('bus', 'Bus Station')])
     intersection = StringField('', render_kw={"placeholder": "Nearest intersection"})
     closedStatus = BooleanField('')
 
@@ -327,19 +327,22 @@ def create_station():
         name = request.form['name']
         stopId = request.form['stopId']
         fare = request.form['fare']
-        isTrain = request.form['isTrain']
-        intersection = request.form['intersection']
-        try:
-            closedStatus = request.form['closedStatus']
-        except:
-            closedStatus = 0
+        if request.form['isTrain'] == 'train':
+            isTrain = 1
+        else:
+            isTrain = 0
+            intersection = request.form['intersection']
+        if request.form.get('closedStatus'):
+            closedStatus = 0;
+        else:
+            closedStatus = 1;
 
         cur = connection.cursor()
 
         try:
             cur.execute("INSERT INTO Station "
                         "VALUES (%s, %s, %s, %s, %s)"
-                        , (stopId, name, fare, closedStatus, isTrain))
+                        , (stopId, name, float(fare), closedStatus, isTrain))
         except pymysql.IntegrityError:
             flash('This station already exists.', 'danger')
             return redirect(url_for('station_management'))

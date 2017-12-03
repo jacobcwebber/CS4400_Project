@@ -17,7 +17,7 @@
                     <tr class="clickable-row">
                         <td>{{ station.Name }}</td>
                         <td>{{ station.StopID }}</td>
-                        <td>${{ station.EnterFare }}</td>
+                        <td>${{ station.Fare }}</td>
                         {% if station.ClosedStatus == 0 %}
                             <td>Open</td>
                         {% elif station.ClosedStatus == 1%}
@@ -31,27 +31,23 @@
         <center>
             <form method="get">
                 <a href="/create-station" class='btn btn-primary' style="width: 120px">Create Station</a>
-            </form>
-            <form method="get">
-                <button id="view-station" class='d-inline btn btn-primary' style="width: 120px">View Station</button>
+                <a href="" id="view-station" class='d-inline btn btn-primary' style="width: 120px">View Station</a>
             </form>
         </center>
     </div>
 <script>
-var stopId = null;
 $('#station-table').on('click', '.clickable-row', function(event) {
     $(this).removeClass('active');
     $(this).addClass('selected').siblings().removeClass('selected');
-});
-
-$('#station-table').on('click', '.clickable-row', function() {
-    stopId = $(this).find('td:nth-child(2)').text();
+    var stopId = $(this).find('td:nth-child(2)').text();
+    var href = "/station-detail/" + stopId;
+    $('#view-station').attr('href', href)
 });
 
 $('#view-station').on('click', function(e) {
-    //alert($SCRIPT_ROOT + "/station-detail/" + stopId)
+    alert($SCRIPT_ROOT + "/station-detail/" + stopId)
     location.href = ("http://stackoverflow.com");
-    //window.location.replace("/station-detail/" + stopId);
+    window.location.replace("/station-detail/" + stopId);
 })
 
 </script>

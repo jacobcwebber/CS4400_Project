@@ -20,9 +20,11 @@
         </div>
         <div class="form-group">
             <span style="display: inline-block; width: 100px">Station Type</span>
-            {{render_field(form.isTrain, style="list-style: none; padding: 0;" , class_="radio")}}<p></p>
+            {{render_field(form.isTrain, style="list-style: none; padding: 0;", class_="radio")}}<p></p>
+        </div>
+        <div class="form-group">
             <span style="display: inline-block; width: 100px"></span>
-            {{render_field(form.intersection, style="width: 200px", class_="form-control input-sm")}}
+            {{render_field(form.intersection, disabled = 'true', style="width: 200px;", class_="form-control input-sm")}}
         </div>
         <div class="form-group">
             {{render_field(form.closedStatus, class_="radio")}}
@@ -33,4 +35,14 @@
     </form>
     </div>
 </div>
+
+<script>
+$('#isTrain-1').click(function(e) {
+    $('#intersection').prop('disabled', false);
+});
+
+$('#isTrain-0').click(function(e) {
+    $('#intersection').prop('disabled', true);
+});
+</script>
 {% endblock %}
