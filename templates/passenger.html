@@ -8,15 +8,16 @@
             <form method="POST" action="" class="form-inline">
                 <div class="form-group">
                     <span style="display: inline-block; width: 100px">Breeze Card</span>
-                    <Select  style="width: 200px" class="form-control input-sm">
-                        <option value="1">0000 0000 0000 0000</option>
-                        <option value="2">0000 0000 0000 0001</option>
-                    </Select>
+                    <select name="breezecard" class="form-control input-sm" style="width: 200px" id="breezecard">
+                        {% for breezecard in breezecards %}
+                            <option value={{ breezecard.BreezecardNum }}>{{  breezecard.BreezecardNum }}</option>
+                        {% endfor %}
+                    </select>
                     <a href="/card-management-passenger">Manage Cards</a> <p></p>
                 </div>
                 <div class="form-group">
                     <span style="display: inline-block; width: 100px">Balance</span>
-                    <span>$15.00</span> <p></p>
+                    <span id="breezecard-value"></span> <p></p>
                 </div>
                 <div class="form-group">
                     <span style="display: inline-block; width: 100px">Starting at</span>
@@ -35,4 +36,26 @@
         </div>
     </div>
  </div>
+
+<script>
+$(function () {
+    changeValue(); //this calls it on load
+    $('#breezecard').change(changeValue);
+});
+
+function changeValue() {
+    $.ajax({
+        url: '/changeBreezecard',
+        data: $('#breezecard').serialize(),
+        type: 'POST',
+        success: function(response) {
+            var response = '$'.concat(response.slice(1, -1));
+            $('#breezecard-value').text(response)
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
+}
+</script>
 {% endblock %}

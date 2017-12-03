@@ -13,13 +13,14 @@
 ################################################################################
 ################################################################################
 
-from flask import Flask, request, render_template, url_for, logging, session, flash, redirect
+from flask import Flask, jsonify, request, render_template, url_for, logging, session, flash, redirect
 import pymysql
 from passlib.hash import md5_crypt
 from wtforms import Form, SelectField, BooleanField, StringField, PasswordField, validators, ValidationError, RadioField
 from functools import wraps
 import re
 from random import randint
+import json
 
 app = Flask(__name__)
 
@@ -217,6 +218,18 @@ class PassengerForm(Form):
     start = SelectField('', choices=startStationsList)
     end = SelectField('', choices=endStationsList)
 
+@app.route('/changeBreezecard', methods=['POST'])
+def changeBreezecard():
+    breezecard = request.form['breezecard']
+    cur = connection.cursor()
+    cur.execute("SELECT Value "
+                "FROM Breezecard "
+                "WHERE BreezecardNum = %s"
+                , int(breezecard))
+    value = cur.fetchone()
+
+    return json.dumps(str(value['Value']))
+
 @app.route('/passenger', methods= ['POST', 'GET'])
 @is_logged_in
 @is_passenger
@@ -232,13 +245,7 @@ def passenger():
     breezecards = cur.fetchall()
     cur.close()
 
-    breezecardList = []
-    i = 1
-    for breezecard in breezecards:
-        breezecardList.append((i, breezecard['BreezecardNum']))
-        i += 1
-
-    return render_template('passenger.html', form=form)
+    return render_template('passenger.html', form=form, breezecards = breezecards)
 
 @app.route('/admin')
 @is_logged_in
@@ -394,6 +401,10 @@ def trip_history():
 @app.errorhandler(404)
 def not_found(error):
     return render_template('error.html'), 404
+
+@app.route('/getmethod/<jsdata>')
+def get_javascript_data(jsdata):
+    return jsdata
 
 if __name__ == '__main__':
     app.secret_key='supersecretkey'
