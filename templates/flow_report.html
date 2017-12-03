@@ -1,11 +1,11 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="panel panel-default h-v-center" style="width: 650px">
+<div class="panel panel-default h-v-center" style="width: 800px">
     <div class="panel-heading"><b>Flow Report</b></div>
     <div class="panel-body">
         {% from "includes/_formhelpers.html" import render_field %}
-        <form class="form-inline">
+        <form class="form-inline" style="width: 100%">
             <div class="form-group" style="width: 100%">
                 <span style="display: inline-block; width: 100px">Start time:</span>
                 {{render_field(form.start, class_="form-control input-sm")}}
@@ -24,7 +24,7 @@
                     <th># Passengers In</th>
                     <th># Passengers Out</th>
                     <th>Flow</th>
-                    <th>Revenue</th>
+                    <th>Revenue ($)</th>
                 </thead>
                 <tbody>
                     {% for station in flowReport %}

@@ -9,7 +9,7 @@
                 <thead clas>
                     <th data-sortable="true">Station Name</th>
                     <th data-sortable="true">Stop ID</th>
-                    <th data-sortable="true">Fare</th>
+                    <th data-sortable="true">Fare ($)</th>
                     <th data-sortable="true">Status</th>
                 </thead>
                 <tbody>
@@ -17,7 +17,7 @@
                     <tr class="clickable-row">
                         <td>{{ station.Name }}</td>
                         <td>{{ station.StopID }}</td>
-                        <td>${{ station.Fare }}</td>
+                        <td>{{ station.Fare }}</td>
                         {% if station.ClosedStatus == 0 %}
                             <td>Open</td>
                         {% elif station.ClosedStatus == 1%}

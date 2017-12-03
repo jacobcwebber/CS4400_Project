@@ -17,11 +17,11 @@
                 </div>
                 <div class="form-group">
                     <span style="display: inline-block; width: 100px">Balance</span>
-                    <span id="breezecard-value"></span> <p></p>
+                    $<span id="breezecard-value"></span> <p></p>
                 </div>
                 <div class="form-group">
                     <span style="display: inline-block; width: 100px; ">Starting at</span>
-                    {{render_field(form.start, id="start-trip", style="width: 200px", class_="form-control input-sm")}}
+                    {{render_field(form.start, id="start", style="width: 200px", class_="form-control input-sm")}}
                     <a class="btn btn-link" style="text-decoration: none; padding: 0" id="begin-trip">Begin Trip</a> <p></p>
                 </div>
                 <div class="form-group">
@@ -45,11 +45,11 @@ $(function () {
 
 function changeValue() {
     $.ajax({
-        url: '/changeBreezecard',
+        url: '/change-breezecard',
         data: $('#breezecard').serialize(),
         type: 'POST',
         success: function(response) {
-            var response = '$'.concat(response.slice(1, -1));
+            var response = response.slice(1, -1);
             $('#breezecard-value').text(response);
         },
         error: function(error) {
@@ -59,13 +59,13 @@ function changeValue() {
 }
 
 $('#begin-trip').click(function(e) {
+    startTrip();
     $('#start-trip').prop('disabled', true);
     $(this).text('Trip in Progress');
     $(this).css('color', 'green');
     $(this).css('cursor', 'default');
     $(this).prop('disabled', true);
     $('#end-trip').css('display', 'inline-block');
-    startTrip();
 });
 
 $('#end-trip').click(function(e) {
@@ -79,21 +79,25 @@ $('#end-trip').click(function(e) {
 
 function startTrip() {
     $.ajax({
-        url: '/beginTrip',
-        data: {},
-        type: 'POST',
-        success: function(response) {
-            console.log(response);
+        type : 'POST',
+        url : '/begin-trip',
+        data : {
+            balance : $('#breezecard-value').text(),
+            breezecard : $('#breezecard').val(),
+            start : $('#start').val()
         },
-        error: function(error) {
-            console.log(error);
+        success: function(data) {
+            alert(data.balance)
+        },
+        error: function(e) {
+            console.log(e);
         }
     });
 }
 
 function endTrip() {
     $.ajax({
-        url: '/endtripTrip',
+        url: '/end-trip',
         data: {},
         type: 'POST',
         success: function(response) {
