@@ -1,33 +1,36 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="panel panel-default h-v-center" style="width: 500px">
+<div>
+<div class="panel panel-default h-v-center" style="width: 500px;">
     <div class="panel-heading"><b>Manage Cards</b></div>
     <div class="panel-body">
     {% from "includes/_formhelpers.html" import render_field %}
         <label>Breeze Cards</label>
         <div class="form-group">
-            <table class="table table-bordered table-hover">
-                <thead>
-                    <th>Card Number</th>
-                    <th>Value</th>
-                    <th></th>
-                </thead>
-                <tbody>
-                    {% for card in cards %}
-                    <tr>
-                        <td>{{ card.BreezecardNum }}</td>
-                        <td>${{ card.Value }}</td>
-                        <td><a>Remove</a></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-responsive" style="max-height: 170px;">
+                <table class="table table-bordered table-hover" id="cards-table">
+                    <thead>
+                        <th>Card Number</th>
+                        <th>Value</th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+                        {% for card in cards %}
+                        <tr class="clickable-row">
+                            <td>{{ card.BreezecardNum }}</td>
+                            <td>${{ card.Value }}</td>
+                            <td><a>Remove</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div> <p></p>
         <form method="POST" action="" class="form-inline">
             <div class="form-group">
                 {{render_field(form.number, class_="form-control input-sm")}}
-                <a class='btn btn-primary btn-sm'>Add Card</a><p></p>
+                <button class='btn btn-primary btn-sm' type="submit" name="action" value="add-card">Add Card</button><p></p>
             </div>
             <div class="panel panel-default">
                 <div class="panel-heading">Add Value to Selected Card</div>
@@ -39,7 +42,7 @@
                     <div class="form-group" style="width: 100%">
                         <span style="display: inline-block; width: 90px;">Value</span>
                         {{render_field(form.value, class_="form-control input-sm")}}
-                        <a class='btn btn-primary btn-sm' style="float: right">Add Value</a><p></p>
+                        <button class='btn btn-primary btn-sm' style="float: right" type="submit" name="action" value="add-value">Add Value</button><p></p>
                     </div>
                 </div>
             </div>
@@ -47,4 +50,26 @@
     </div>
     </div>
 </div>
+
+<script>
+$(function () {
+    $('#cards-table').on('click', '.clickable-row', function(event) {
+        $(this).removeClass('active');
+        $(this).addClass('selected').siblings().removeClass('selected');
+        var breezecard = $(this).find('td:first-child').text()
+    });
+
+    $.ajax({
+        url: '/card-management-passenger',
+        data: breezecard.serialize(),
+        type: 'POST',
+        success: function(response) {
+            $('#breezecard-value').text(response)
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
+});
+</script>
 {% endblock %}

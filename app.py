@@ -21,6 +21,8 @@ from functools import wraps
 import re
 from random import randint
 import json
+import datetime
+import time
 
 app = Flask(__name__)
 
@@ -391,10 +393,54 @@ class PassengerCardManagementForm(Form):
 def card_management_passenger():
     form = PassengerCardManagementForm(request.form)
     cur = connection.cursor()
-    cur.execute("SELECT BreezecardNum, Value " 
+    cur.execute("SELECT BreezecardNum, Value "
                 "FROM Breezecard "
                 "WHERE Owner = %s",session['username'])
     cards = cur.fetchall()
+
+    if request.method == 'POST':
+        if request.form['action'] == 'add-card':
+            breezecardNum = request.form['number']
+
+            cur = connection.cursor()
+            try:
+                cur.execute("INSERT INTO Breezecard "
+                            "VALUES (%s, 0.00, %s)"
+                            , (breezecardNum, session['username']))
+
+                flash('Card added.', 'success')
+                return redirect(url_for('card_management_passenger'))
+
+            except pymysql.IntegrityError:
+                cur.execute("SELECT * "
+                            "FROM Breezecard "
+                            "WHERE BreezecardNum = %s"
+                            , breezecardNum)
+
+                owner = cur.fetchone()
+
+                if owner['Owner'] == None:
+                    cur.execute("UPDATE Breezecard "
+                                "SET Owner = %s "
+                                "WHERE BreezecardNum = %s"
+                                , (session['username'], breezecardNum))
+
+                    flash('Card added.', 'success')
+                    return redirect(url_for('card_management_passenger'))
+
+                else:
+                    ts = time.time()
+                    timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+                    cur.execute("INSERT INTO Conflict "
+                                "VALUES (%s, %s, %s)"
+                                , (session['username'], breezecardNum, timestamp))
+
+                    flash('Card is already taken.', 'danger')
+                    return redirect(url_for('card_management_passenger'))
+            cur.close()
+
+        elif request.form['action'] == 'add-value':
+            value = request.form['value']
 
 
 
