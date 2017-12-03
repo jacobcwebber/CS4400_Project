@@ -12,18 +12,14 @@
                 <th>Previous Owner</th>
             </thead>
             <tbody>
+               {% for card in cards %}
                 <tr>
-                    <td>1523 5548 9685 4475</td>
-                    <td>Kevin</td>
-                    <td>11/30/2017</td>
-                    <td>Jacob</td>
+                    <td>{{ card.BreezecardNum }}</td>
+                    <td>{{ card.NewOwner }}</td>
+                    <td>{{ card.DateSuspended }}</td>
+                    <td>{{ card.PreviousOwner }}</td>
                 </tr>
-                <tr>
-                    <td>7548 1126 0027 5123</td>
-                    <td>Brett</td>
-                    <td>12/1/2017</td>
-                    <td>Kevin</td>
-                </tr>
+                {% endfor %}
             </tbody>
         </table>
         <center>
