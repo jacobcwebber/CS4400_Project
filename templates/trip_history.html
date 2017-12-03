@@ -1,11 +1,11 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="panel panel-default h-v-center" style="width: 550px">
+<div class="panel panel-default h-v-center" style="width: 700px">
     <div class="panel-heading"><b>Trip History</b></div>
     <div class="panel-body">
         {% from "includes/_formhelpers.html" import render_field %}
-        <form class="form-inline">
+        <form method="POST" action= "" class="form-inline">
             <div class="form-group" style="width: 100%">
                 <span style="display: inline-block; width: 100px">Start Time</span>
                 {{render_field(form.start, class_="form-control input-sm")}}
@@ -19,34 +19,22 @@
         </form>
             <table class="table table-bordered table-hover">
                 <thead>
-                    <th>Station Name</th>
-                    <th># Passengers In</th>
-                    <th># Passengers Out</th>
-                    <th>Flow</th>
-                    <th>Revenue</th>
+                    <th>Time</th>
+                    <th>Source</th>
+                    <th>Destination</th>
+                    <th>Fare Paid</th>
+                    <th>Card #</th>
                 </thead>
                 <tbody>
+                    {% for trip in trips %}
                     <tr>
-                        <td>Station 1</td>
-                        <td>500</td>
-                        <td>600</td>
-                        <td>-100</td>
-                        <td>$500.00</td>
+                        <td>{{ trip.StartTime }}</td>
+                        <td>{{ trip.StartName }}</td>
+                        <td>{{ trip.EndName }}</td>
+                        <td>${{ trip.Fare }}</td>
+                        <td>{{ trip.BreezecardNum }}</td>
                     </tr>
-                    <tr>
-                        <td>Station 2</td>
-                        <td>750</td>
-                        <td>500</td>
-                        <td>250</td>
-                        <td>$1250.00</td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
     </div>

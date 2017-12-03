@@ -17,7 +17,7 @@
                     <tr class="clickable-row">
                         <td>{{ station.Name }}</td>
                         <td>{{ station.StopID }}</td>
-                        <td>{{ station.EnterFare }}</td>
+                        <td>${{ station.EnterFare }}</td>
                         {% if station.ClosedStatus == 0 %}
                             <td>Open</td>
                         {% elif station.ClosedStatus == 1%}
@@ -27,7 +27,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
+        </div> <p></p>
         <center>
             <form method="get">
                 <a href="/create-station" class='btn btn-primary' style="width: 120px">Create Station</a>

@@ -13,13 +13,14 @@
 ################################################################################
 ################################################################################
 
-from flask import Flask, request, render_template, url_for, logging, session, flash, redirect
+from flask import Flask, jsonify, request, render_template, url_for, logging, session, flash, redirect
 import pymysql
 from passlib.hash import md5_crypt
 from wtforms import Form, SelectField, BooleanField, StringField, PasswordField, validators, ValidationError, RadioField
 from functools import wraps
 import re
 from random import randint
+import json
 
 app = Flask(__name__)
 
@@ -217,6 +218,18 @@ class PassengerForm(Form):
     start = SelectField('', choices=startStationsList)
     end = SelectField('', choices=endStationsList)
 
+@app.route('/changeBreezecard', methods=['POST'])
+def changeBreezecard():
+    breezecard = request.form['breezecard']
+    cur = connection.cursor()
+    cur.execute("SELECT Value "
+                "FROM Breezecard "
+                "WHERE BreezecardNum = %s"
+                , breezecard)
+    value = cur.fetchone()
+
+    return json.dumps(str(value['Value']))
+
 @app.route('/passenger', methods= ['POST', 'GET'])
 @is_logged_in
 @is_passenger
@@ -232,13 +245,7 @@ def passenger():
     breezecards = cur.fetchall()
     cur.close()
 
-    breezecardList = []
-    i = 1
-    for breezecard in breezecards:
-        breezecardList.append((i, breezecard['BreezecardNum']))
-        i += 1
-
-    return render_template('passenger.html', form=form)
+    return render_template('passenger.html', form=form, breezecards = breezecards)
 
 @app.route('/admin')
 @is_logged_in
@@ -337,7 +344,12 @@ def station_detail(id):
 @app.route('/suspended-cards', methods =['POST', 'GET'])
 @is_logged_in
 def suspended_cards():
-    return render_template('suspended_cards.html')
+    cur = connection.cursor()
+    cur.execute("SELECT B.BreezecardNum, C.Username AS NewOwner, C.DateTime AS DateSuspended, B.Owner AS PreviousOwner "
+                "FROM Breezecard AS B JOIN Conflict AS C ON B.BreezecardNum = C.BreezecardNum")
+    cards = cur.fetchall()
+
+    return render_template('suspended_cards.html', cards=cards)
 
 class AdminCardManagementForm(Form):
     owner = StringField('')
@@ -392,16 +404,37 @@ class TripHistoryForm(Form):
     start = StringField('')
     end = StringField('')
 
+@app.route('/update-trip-history', methods=['POST'])
+def update_trip_history():
+    cur = connection.cursor()
+    cur.execute("SELECT t.StartTime, t.StartsAt, t.EndsAt, t.Fare, t.BreezecardNum "
+                "FROM Trip as t LEFT JOIN Breezecard as b ON t.BreezecardNum = b.BreezecardNum "
+                "WHERE b.Owner = %s AND t.StartTime BETWEEN %s AND %s"
+                , (session['username'], minTime, maxTime))
+
 @app.route('/trip-history')
 @is_logged_in
 def trip_history():
     form = TripHistoryForm(request.form)
 
-    return render_template('trip_history.html', form=form)
+    cur = connection.cursor()
+    cur.execute("SELECT t.StartTime, s1.Name AS StartName, s2.Name AS EndName, t.Fare, t.BreezecardNum "
+                "FROM Trip as t LEFT JOIN Breezecard as b ON t.BreezecardNum = b.BreezecardNum "
+                "JOIN Station as s1 ON s1.StopID = t.StartsAt "
+                "JOIN Station as s2 ON s2.StopID = t.EndsAt "
+                "WHERE b.Owner = %s"
+                , (session['username']))
+    trips = cur.fetchall()
+
+    return render_template('trip_history.html', form=form, trips=trips)
 
 @app.errorhandler(404)
 def not_found(error):
     return render_template('error.html'), 404
+
+@app.route('/getmethod/<jsdata>')
+def get_javascript_data(jsdata):
+    return jsdata
 
 if __name__ == '__main__':
     app.secret_key='supersecretkey'
