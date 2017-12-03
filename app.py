@@ -395,7 +395,8 @@ def card_management_passenger():
     cur = connection.cursor()
     cur.execute("SELECT BreezecardNum, Value "
                 "FROM Breezecard "
-                "WHERE Owner = %s",session['username'])
+                "WHERE Owner = %s AND BreezecardNum NOT IN (SELECT DISTINCT BreezecardNum FROM Conflict)" 
+                ,session['username'])
     cards = cur.fetchall()
 
     if request.method == 'POST':
