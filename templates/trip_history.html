@@ -9,12 +9,12 @@
             <div class="form-group" style="width: 100%">
                 <span style="display: inline-block; width: 100px">Start Time</span>
                 {{render_field(form.start, class_="form-control input-sm")}}
-                <a class='btn btn-primary btn-sm' style="float: right; width: 80px;">Update</a> <p></p>
+                <input class="btn btn-primary btn-sm" type="submit" name="action" value="Update Filter"> <p></p>
             </div>
             <div class="form-group" style="width: 100%">
                 <span style="display: inline-block; width: 100px">End Time</span>
                 {{render_field(form.end, class_="form-control input-sm")}}
-                <a class='btn btn-primary btn-sm' style="float: right; width: 80px;">Reset</a> <p></p>
+                <button class="btn btn-primary btn-sm" id="reset-button" type="submit" name="action" value="reset">Reset</button> <p></p>
             </div>
         </form>
             <table class="table table-bordered table-hover" id="trip-history-table" data-toggle="table" data-sort-order="desc">

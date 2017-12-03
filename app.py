@@ -16,7 +16,7 @@
 from flask import Flask, jsonify, request, render_template, url_for, logging, session, flash, redirect
 import pymysql
 from passlib.hash import md5_crypt
-from wtforms import Form, SelectField, BooleanField, StringField, PasswordField, validators, ValidationError, RadioField
+from wtforms import Form, SelectField, BooleanField, StringField, PasswordField, validators, ValidationError, RadioField, DateTimeField
 from functools import wraps
 import re
 from random import randint
@@ -474,7 +474,15 @@ def card_management_admin():
                     "WHERE BreezecardNum NOT IN (SELECT BreezecardNum FROM Conflict) "
                     "AND Owner LIKE %s AND BreezecardNum LIKE %s AND Value >= %s AND Value <= %s"
                     , ( ownerName, cardNumber, float(lowerValue), float(upperValue)))
-            allCards = cur.fetchall() 
+            allCards = cur.fetchall()
+            if ownerName == "%":
+                cur.execute("SELECT * "
+                    "FROM Breezecard "
+                    "WHERE BreezecardNum NOT IN (SELECT BreezecardNum FROM Conflict) "
+                    "AND Owner IS NULL AND BreezecardNum LIKE %s AND Value >= %s AND Value <= %s"
+                    , ( cardNumber, float(lowerValue), float(upperValue)))
+                noneCards = cur.fetchall() 
+                allCards.extend(noneCards)
             if suspended == 1:
                 cur.execute("SELECT DISTINCT B.BreezecardNum, B.Value "
                             "FROM Breezecard AS B JOIN Conflict AS C "
@@ -599,18 +607,9 @@ def card_management_passenger():
     return render_template('card_management_passenger.html', form=form, cards = cards)
 
 class TripHistoryForm(Form):
-    start = StringField('')
-    end = StringField('')
-
-@app.route('/update-trip-history', methods=['POST'])
-def update_trip_history():
-    cur = connection.cursor()
-    cur.execute("SELECT t.StartTime, t.StartsAt, t.EndsAt, t.Fare, t.BreezecardNum "
-                "FROM Trip as t LEFT JOIN Breezecard as b ON t.BreezecardNum = b.BreezecardNum "
-                "WHERE b.Owner = %s AND t.StartTime BETWEEN %s AND %s"
-                , (session['username'], minTime, maxTime))
-
-@app.route('/trip-history')
+    start =DateTimeField('')
+    end = DateTimeField('') 
+@app.route('/trip-history', methods = ['POST', 'GET'])
 @is_logged_in
 def trip_history():
     form = TripHistoryForm(request.form)
@@ -623,7 +622,37 @@ def trip_history():
                 "WHERE b.Owner = %s"
                 , (session['username']))
     trips = cur.fetchall()
+    if request.method == 'POST':
+        if request.form['action'] == 'reset':
+            form.start.data = ''
+            form.end.data = ''
+            cur.execute("SELECT t.StartTime, s1.Name AS StartName, s2.Name AS EndName, t.Fare, t.BreezecardNum "
+                "FROM Trip as t LEFT JOIN Breezecard as b ON t.BreezecardNum = b.BreezecardNum "
+                "JOIN Station as s1 ON s1.StopID = t.StartsAt "
+                "JOIN Station as s2 ON s2.StopID = t.EndsAt "
+                "WHERE b.Owner = %s"
+                , (session['username']))
+        else:
+            try:
+                startTime = request.form['start']
+                endTime = request.form['end']
+                if len(startTime) == 0:
+                    startTime = '1950-1-1 00:00:00'
+                if len(endTime) == 0:
+                    endTime = "2020 12-31 23:59:59"
+                cur.execute("SELECT t.StartTime, s1.Name, s2.Name, t.Fare, t.BreezecardNum "
+                            "FROM Trip as t LEFT JOIN Breezecard as b ON t.BreezecardNum = b.BreezecardNum "
+                            "JOIN Station as s1 ON s1.StopID = t.StartsAt "
+                            "JOIN Station as s2 ON s2.StopID = t.EndsAt "
+                            "WHERE b.Owner = %s AND t.StartTime BETWEEN %s AND %s"
+                            , session['username'], startTime, endTime)
+                cur.close()
+                return render_template('trip_history.html', form=form, trips=trips)
+            except:
+                flash('Incorrect time format', 'danger')
 
+
+    cur.close()
     return render_template('trip_history.html', form=form, trips=trips)
 
 @app.errorhandler(404)
