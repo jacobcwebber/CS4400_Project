@@ -428,11 +428,26 @@ def card_management_admin():
                 "WHERE BreezecardNum NOT IN (SELECT BreezecardNum FROM Conflict)")
     allCards = cur.fetchall()
 
-    if request.method == 'POST':
-        ## all your stuff here
+    # if request.method == 'POST':
+    #     if request.form.get('show_suspended'):
+    #         suspended = 1
+    #     else:
+    #         suspended = 0  
+    #     if suspended == 1:
+    #         cur = connection.cursor()
+    #         cur.execute("SELECT DISTINCT B.BreezecardNum, B.Value "
+    #                     "FROM Breezecard AS B JOIN Conflict AS C "
+    #                     "ON B.BreezecardNum = C.BreezecardNum")
+    #         suspendedCards = cur.fetchall()
+    #         for card in suspendedCards:
+    #             card['Owner'] = 'Suspended'    
+    #     else:
+    #         suspendedCards = []
 
-        flash('Filter has been updated.', 'success')
-        return redirect(url_for('card_management_admin'))
+    #     allCards.append(suspendedCards)
+
+    #     flash('Filter has been updated.' + str(len(suspendedCards)), 'success')
+    #     return redirect(url_for('card_management_admin'))
 
     return render_template('card_management_admin.html', form=form, cards=allCards)
 
