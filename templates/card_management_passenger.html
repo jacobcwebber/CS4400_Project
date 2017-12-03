@@ -12,14 +12,14 @@
                 <table class="table table-bordered table-hover" id="cards-table" data-toggle="table" data-sort-order="desc">
                     <thead>
                         <th data-sortable="true">Card Number</th>
-                        <th data-sortable="true">Value</th>
+                        <th data-sortable="true">Value ($)</th>
                         <th></th>
                     </thead>
                     <tbody>
                         {% for card in cards %}
                         <tr class="clickable-row">
                             <td>{{ card.BreezecardNum }}</td>
-                            <td>${{ card.Value }}</td>
+                            <td>{{ card.Value }}</td>
                             <td><a>Remove</a></td>
                         </tr>
                         {% endfor %}

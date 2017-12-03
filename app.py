@@ -23,6 +23,7 @@ from random import randint
 import json
 import datetime
 import time
+import sys
 
 app = Flask(__name__)
 
@@ -220,7 +221,7 @@ class PassengerForm(Form):
     start = SelectField('', choices=startStationsList)
     end = SelectField('', choices=endStationsList)
 
-@app.route('/changeBreezecard', methods=['POST'])
+@app.route('/change-breezecard', methods=['POST'])
 def changeBreezecard():
     breezecard = request.form['breezecard']
     cur = connection.cursor()
@@ -232,23 +233,34 @@ def changeBreezecard():
 
     return json.dumps(str(value['Value']))
 
-@app.route('/beginTrip', methods=['POST'])
+@app.route('/begin-trip', methods=['POST'])
 def beginTrip():
     breezecard = request.form['breezecard']
     startStation = request.form['start']
+    balance = request.form['balance']
+
     cur = connection.cursor()
     cur.execute("SELECT Fare "
                 "FROM Station "
                 "WHERE Name = %s"
                 , startStation)
-    fare = cur.fetchone()['Fare']
 
-    cur.execute("INSERT INTO Trip "
+    station = cur.fetchone()
+    fare = station['Fare']
+
+    if float(fare) > float(balance):
+        flash('You do not have enough money on your Breezecard to take this trip.', 'danger')
+        return redirect(url_for('passenger'))
+
+    cur.execute("INSERT INTO Trip (Fare, Breezecard, StartsAt, EndsAt)"
                 "VALUES (%s, %s, %s, %s)"
-                , (fare, breezecard, startStation, None))
+                , (float(fare), breezecard, startStation, None))
     cur.close()
 
-@app.route('/endTrip', methods=['POST'])
+    return redirect(url_for('passenger'))
+
+
+@app.route('/end-trip', methods=['POST'])
 def endTrip():
     breezecard = request.form['breezecard']
     startStation = request.form['start']
@@ -259,10 +271,9 @@ def endTrip():
                 "SET EndsAt = %s "
                 "WHERE BreezecardNum = %s AND StartTime = (SELECT StartTime "
                                                           "FROM Trip "
-                                                          "WHERE BreezecardNum = %s, StartsAt = %s ORDER BY Desc LIMIT 1"
+                                                          "WHERE BreezecardNum = %s, StartsAt = %s ORDER BY Desc LIMIT 1)"
                 , (endStation, breezecard, breezecard, startStation))
     cur.close()
-
 
 @app.route('/passenger', methods= ['POST', 'GET'])
 @is_logged_in
@@ -471,6 +482,14 @@ class PassengerCardManagementForm(Form):
     creditCard = StringField('')
     value = StringField('')
 
+    def validate_number(form, field):
+        try:
+            int(field.data)
+        except:
+            raise ValidationError('Breezecard Number must be an integer.')
+        if len(str(field.data)) != 16:
+            raise ValidationError('Breezecard Number must be 16 digits')
+
 @app.route('/card-management-passenger', methods = ['POST', 'GET'])
 @is_logged_in
 @is_passenger
@@ -485,7 +504,7 @@ def card_management_passenger():
     cur.close()
 
     if request.method == 'POST':
-        if request.form['action'] == 'add-card':
+        if request.form['action'] == 'add-card' and form.validate():
             breezecardNum = request.form['number']
 
             cur = connection.cursor()
