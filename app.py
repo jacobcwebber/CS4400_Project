@@ -246,6 +246,7 @@ def beginTrip():
     cur.execute("INSERT INTO Trip "
                 "VALUES (%s, %s, %s, %s)"
                 , (fare, breezecard, startStation, None))
+    connection.commit()
     cur.close()
 
 @app.route('/endTrip', methods=['POST'])
@@ -261,6 +262,7 @@ def endTrip():
                                                           "FROM Trip "
                                                           "WHERE BreezecardNum = %s, StartsAt = %s ORDER BY Desc LIMIT 1"
                 , (endStation, breezecard, breezecard, startStation))
+    connection.commit()
     cur.close()
 
 
@@ -317,6 +319,8 @@ class CreateStationForm(Form):
             float(field.data)
         except:
             raise ValidationError('Fare must be a number.')
+        if float(field.data) < 0 or float(field.data) > 50:
+            raise ValidationError('Fare must be between 0 and 50')    
 
 @app.route('/create-station', methods=['POST', 'GET'])
 @is_logged_in
@@ -351,7 +355,7 @@ def create_station():
             cur.execute("INSERT INTO BusStation "
                         "VALUES (%s, %s)"
                         , (stopId, intersection))
-
+        connection.commit()
         cur.close()
 
         flash('Your station has been created.', 'success')
@@ -392,6 +396,7 @@ def station_detail(id):
                     "SET Fare = %s, ClosedStatus = %s "
                     "WHERE StopID = %s"
                     , (float(fare), closedStatus, id))
+        connection.commit()
         cur.close()
 
         flash('Your station has updated.', 'success')
@@ -436,26 +441,53 @@ def card_management_admin():
                 "WHERE BreezecardNum NOT IN (SELECT BreezecardNum FROM Conflict)")
     allCards = cur.fetchall()
 
-    # if request.method == 'POST':
-    #     if request.form.get('show_suspended'):
-    #         suspended = 1
-    #     else:
-    #         suspended = 0  
-    #     if suspended == 1:
-    #         cur = connection.cursor()
-    #         cur.execute("SELECT DISTINCT B.BreezecardNum, B.Value "
-    #                     "FROM Breezecard AS B JOIN Conflict AS C "
-    #                     "ON B.BreezecardNum = C.BreezecardNum")
-    #         suspendedCards = cur.fetchall()
-    #         for card in suspendedCards:
-    #             card['Owner'] = 'Suspended'    
-    #     else:
-    #         suspendedCards = []
-
-    #     allCards.append(suspendedCards)
-
-    #     flash('Filter has been updated.' + str(len(suspendedCards)), 'success')
-    #     return redirect(url_for('card_management_admin'))
+    if request.method == 'POST':
+        if request.form['action'] == 'reset':
+            form.owner.data = ''
+            form.number.data = ''
+            form.value_lower.data = ''
+            form.value_upper.data = ''
+            form.show_suspended.data = ''
+            cur.execute("SELECT * "
+                "FROM Breezecard "
+                "WHERE BreezecardNum NOT IN (SELECT BreezecardNum FROM Conflict)")
+            allCards = cur.fetchall()
+        else:
+            ownerName = request.form['owner']
+            if len(ownerName) == 0:
+                ownerName = "%"
+            cardNumber = request.form['number']
+            if len(cardNumber) == 0:
+                cardNumber = "%"
+            upperValue = request.form['value_lower']
+            if len(upperValue) == 0:
+                upperValue = 1000.00
+            lowerValue = request.form['value_upper']
+            if len(lowerValue) == 0:
+                lowerValue = 0.00
+            if request.form.get('show_suspended'):
+                suspended = 1
+            else:
+                suspended = 0
+            cur.execute("SELECT * "
+                    "FROM Breezecard "
+                    "WHERE BreezecardNum NOT IN (SELECT BreezecardNum FROM Conflict) "
+                    "AND Owner LIKE %s AND BreezecardNum LIKE %s AND Value >= %s AND Value <= %s"
+                    , ( ownerName, cardNumber, float(lowerValue), float(upperValue)))
+            allCards = cur.fetchall() 
+            if suspended == 1:
+                cur.execute("SELECT DISTINCT B.BreezecardNum, B.Value "
+                            "FROM Breezecard AS B JOIN Conflict AS C "
+                            "ON B.BreezecardNum = C.BreezecardNum WHERE Owner LIKE %s AND B.BreezecardNum LIKE %s AND Value >= %s AND Value <= %s"
+                            , ( ownerName, cardNumber, float(lowerValue), float(upperValue)))
+                suspendedCards = cur.fetchall()
+                for card in suspendedCards:
+                    card['Owner'] = 'Suspended'
+                if len(suspendedCards) > 0:        
+                    allCards.extend(suspendedCards)        
+        flash('Filter has been updated.', 'success')
+        cur.close()
+        return render_template('card_management_admin.html', form=form, cards=allCards)
 
     return render_template('card_management_admin.html', form=form, cards=allCards)
 
@@ -508,7 +540,7 @@ def card_management_passenger():
                 cur.execute("INSERT INTO Breezecard "
                             "VALUES (%s, 0.00, %s)"
                             , (breezecardNum, session['username']))
-
+                connection.commit()
                 flash('Card added.', 'success')
                 return redirect(url_for('card_management_passenger'))
 
@@ -525,7 +557,8 @@ def card_management_passenger():
                                 "SET Owner = %s "
                                 "WHERE BreezecardNum = %s"
                                 , (session['username'], breezecardNum))
-
+                    connection.commit()
+                    cur.close()
                     flash('Card added.', 'success')
                     return redirect(url_for('card_management_passenger'))
 
@@ -539,6 +572,7 @@ def card_management_passenger():
                                          "WHERE Owner = (SELECT Owner FROM Breezecard WHERE BreezecardNum = %s) "
                                          "AND BreezecardNum NOT IN (SELECT DISTINCT BreezecardNum FROM Conflict)"
                                          , breezecardNum)
+                    connection.commit()
 
                     if result == 0:
                         #Make sure we check random number doesn't already exist
@@ -550,7 +584,8 @@ def card_management_passenger():
                         owner = cur.fetchone()
                         cur.execute("INSERT INTO Breezecard Values (%s, 0.00, %s)"
                                     , (randomNumber, owner['Owner']))
-
+                        connection.commit()
+                        cur.close()
 
 
                     flash('Card is already taken.', 'danger')
