@@ -391,9 +391,10 @@ class PassengerCardManagementForm(Form):
 def card_management_passenger():
     form = PassengerCardManagementForm(request.form)
     cur = connection.cursor()
-    cur.execute("SELECT BreezecardNum, Value " 
+    cur.execute("SELECT BreezecardNum, Value "
                 "FROM Breezecard "
-                "WHERE Owner = %s",session['username'])
+                "WHERE Owner = %s AND BreezecardNum NOT IN (SELECT DISTINCT BreezecardNum FROM Conflict)" 
+                ,session['username'])
     cards = cur.fetchall()
 
 
