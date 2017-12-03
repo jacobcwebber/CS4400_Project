@@ -361,7 +361,7 @@ def create_station():
 
 class StationDetailForm(Form):
     fare = StringField('')
-    openStation = BooleanField('')
+    closedStatus = BooleanField('')
 
 @app.route('/station-detail/<string:id>/', methods=['POST', 'GET'])
 @is_logged_in
@@ -370,12 +370,31 @@ def station_detail(id):
     form = StationDetailForm(request.form)
 
     cur = connection.cursor()
-    result = cur.execute("SELECT * FROM Station s LEFT OUTER JOIN BusStation b "
+    cur.execute("SELECT * FROM Station s LEFT OUTER JOIN BusStation b "
                          "ON s.StopID = b.StopID "
                          "WHERE s.StopID = %s"
                          , [id])
     station = cur.fetchone()
     cur.close()
+
+    form.fare.data = str(station['Fare'])
+
+    if request.method == 'POST':
+        fare = request.form['fare']
+        if request.form.get('closedStatus'):
+            closedStatus = 0;
+        else:
+            closedStatus = 1;
+
+        cur = connection.cursor()
+        cur.execute("UPDATE Station "
+                    "SET Fare = %s, ClosedStatus = %s "
+                    "WHERE StopID = %s"
+                    , (float(fare), closedStatus, id))
+        cur.close()
+
+        flash('Your station has updated.', 'success')
+        return redirect(url_for('station_management'))
 
     return render_template('station_detail.html', form=form, station=station)
 
@@ -408,6 +427,12 @@ def card_management_admin():
                 "FROM Breezecard "
                 "WHERE BreezecardNum NOT IN (SELECT BreezecardNum FROM Conflict)")
     allCards = cur.fetchall()
+
+    if request.method == 'POST':
+        ## all your stuff here
+
+        flash('Filter has been updated.', 'success')
+        return redirect(url_for('card_management_admin'))
 
     return render_template('card_management_admin.html', form=form, cards=allCards)
 

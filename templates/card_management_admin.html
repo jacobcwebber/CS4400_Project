@@ -22,10 +22,10 @@
         </div>
         <div class="form-group">
             <span style="display: inline-block; width: 100px">Value between:</span>
-            {{render_field(form.value_upper, style="width: 66px", class_="form-control input-sm")}}
+            {{render_field(form.value_upper, style="width: 64px", class_="form-control input-sm")}}
             <span>and</span>
-            {{render_field(form.value_lower, style="width: 66px", class_="form-control input-sm")}}
-            <a class='btn btn-primary btn-sm'>Update Filter</a> <p></p>
+            {{render_field(form.value_lower, style="width: 64px", class_="form-control input-sm")}}
+            <input class="btn btn-primary btn-sm" type="submit" name="action" value="Update Filter"> <p></p>
         </div>
     </form>
     <form method="POST" action="" class="form-inline">
@@ -46,7 +46,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </div> <p></p>    
+        </div> <p></p>
         <div class="form-group">
             {{render_field(form.set_value, class_="form-control input-sm")}}
             <a class="btn btn-primary btn-sm" style="width: 165px;">Set Value of Selected Card </a><p></p>
