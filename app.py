@@ -204,14 +204,14 @@ def logout():
 
 class PassengerForm(Form):
     cur = connection.cursor()
-    cur.execute("SELECT StopID, Name, EnterFare "
+    cur.execute("SELECT StopID, Name, Fare "
                 "FROM Station")
     stations = cur.fetchall()
     cur.close()
 
     startStationsList = []
     for station in stations:
-        startStationsList.append((station['StopID'], station['Name'] + ' - $' + str(station['EnterFare'])))
+        startStationsList.append((station['Name'], station['Name'] + ' - $' + str(station['Fare'])))
 
     endStationsList = []
     for station in stations:
@@ -231,6 +231,38 @@ def changeBreezecard():
     value = cur.fetchone()
 
     return json.dumps(str(value['Value']))
+
+@app.route('/beginTrip', methods=['POST'])
+def beginTrip():
+    breezecard = request.form['breezecard']
+    startStation = request.form['start']
+    cur = connection.cursor()
+    cur.execute("SELECT Fare "
+                "FROM Station "
+                "WHERE Name = %s"
+                , startStation)
+    fare = cur.fetchone()['Fare']
+
+    cur.execute("INSERT INTO Trip "
+                "VALUES (%s, %s, %s, %s)"
+                , (fare, breezecard, startStation, None))
+    cur.close()
+
+@app.route('/endTrip', methods=['POST'])
+def endTrip():
+    breezecard = request.form['breezecard']
+    startStation = request.form['start']
+    endStation = request.form['end']
+    cur = connection.cursor()
+
+    cur.execute("UPDATE Trip "
+                "SET EndsAt = %s "
+                "WHERE BreezecardNum = %s AND StartTime = (SELECT StartTime "
+                                                          "FROM Trip "
+                                                          "WHERE BreezecardNum = %s, StartsAt = %s ORDER BY Desc LIMIT 1"
+                , (endStation, breezecard, breezecard, startStation))
+    cur.close()
+
 
 @app.route('/passenger', methods= ['POST', 'GET'])
 @is_logged_in
@@ -440,7 +472,7 @@ def card_management_passenger():
                                          "WHERE Owner = (SELECT Owner FROM Breezecard WHERE BreezecardNum = %s) "
                                          "AND BreezecardNum NOT IN (SELECT DISTINCT BreezecardNum FROM Conflict)"
                                          , breezecardNum)
-                    
+
                     if result == 0:
                         #Make sure we check random number doesn't already exist
                         randomNumber = randint(0000000000000000, 9999999999999999)
@@ -450,7 +482,7 @@ def card_management_passenger():
                                     , breezecardNum)
                         owner = cur.fetchone()
                         cur.execute("INSERT INTO Breezecard Values (%s, 0.00, %s)"
-                                    , (randomNumber, owner['Owner']))    
+                                    , (randomNumber, owner['Owner']))
 
 
 
