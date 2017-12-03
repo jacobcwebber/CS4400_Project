@@ -14,21 +14,13 @@
                     <th></th>
                 </thead>
                 <tbody>
+                    {% for card in cards %}
                     <tr>
-                        <td>1523 5548 9685 4475</td>
-                        <td>$57.00</td>
+                        <td>{{ card.BreezecardNum }}</td>
+                        <td>${{ card.Value }}</td>
                         <td><a>Remove</a></td>
                     </tr>
-                    <tr>
-                        <td>7548 1126 0027 5123</td>
-                        <td>$11.50</td>
-                        <td><a>Remove</a></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div> <p></p>

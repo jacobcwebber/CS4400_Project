@@ -330,6 +330,7 @@ def station_detail(id):
                          "WHERE s.StopID = %s"
                          , [id])
     station = cur.fetchone()
+    cur.close()
 
     return render_template('station_detail.html', form=form, station=station)
 
@@ -377,8 +378,15 @@ class PassengerCardManagementForm(Form):
 @is_passenger
 def card_management_passenger():
     form = PassengerCardManagementForm(request.form)
+    cur = connection.cursor()
+    cur.execute("SELECT BreezecardNum, Value " 
+                "FROM Breezecard "
+                "WHERE Owner = %s",session['username'])
+    cards = cur.fetchall()
 
-    return render_template('card_management_passenger.html', form=form)
+
+
+    return render_template('card_management_passenger.html', form=form, cards = cards)
 
 class TripHistoryForm(Form):
     start = StringField('')
