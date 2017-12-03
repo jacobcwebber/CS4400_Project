@@ -241,7 +241,8 @@ def passenger():
     cur = connection.cursor()
     cur.execute("SELECT BreezecardNum, Value "
                 "FROM Breezecard "
-                "WHERE Owner = %s",
+                "WHERE Owner = %s "
+                "AND BreezecardNum NOT IN (SELECT BreezecardNum FROM Conflict)",
                 session['username'])
 
     breezecards = cur.fetchall()
@@ -435,6 +436,23 @@ def card_management_passenger():
                     cur.execute("INSERT INTO Conflict "
                                 "VALUES (%s, %s, %s)"
                                 , (session['username'], breezecardNum, timestamp))
+                    result = cur.execute("SELECT * FROM Breezecard "
+                                         "WHERE Owner = (SELECT Owner FROM Breezecard WHERE BreezecardNum = %s) "
+                                         "AND BreezecardNum NOT IN (SELECT DISTINCT BreezecardNum FROM Conflict)"
+                                         , breezecardNum)
+                    
+                    if result == 0:
+                        #Make sure we check random number doesn't already exist
+                        randomNumber = randint(0000000000000000, 9999999999999999)
+                        cur.execute("SELECT Owner "
+                                    "FROM Breezecard "
+                                    "WHERE BreezecardNum = %s"
+                                    , breezecardNum)
+                        owner = cur.fetchone()
+                        cur.execute("INSERT INTO Breezecard Values (%s, 0.00, %s)"
+                                    , (randomNumber, owner['Owner']))    
+
+
 
                     flash('Card is already taken.', 'danger')
                     return redirect(url_for('card_management_passenger'))
