@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="panel panel-default h-v-center" style="width: 550px">
+<div class="panel panel-default h-v-center" style="width: 650px">
     <div class="panel-heading"><b>Flow Report</b></div>
     <div class="panel-body">
         {% from "includes/_formhelpers.html" import render_field %}
@@ -17,6 +17,7 @@
                 <a class='btn btn-primary btn-sm' style="float: right; width: 80px;">Reset</a> <p></p>
             </div>
         </form>
+        <div>
             <table class="table table-bordered table-hover">
                 <thead>
                     <th>Station Name</th>
@@ -26,29 +27,18 @@
                     <th>Revenue</th>
                 </thead>
                 <tbody>
+                    {% for station in flowReport %}
                     <tr>
-                        <td>Station 1</td>
-                        <td>500</td>
-                        <td>600</td>
-                        <td>-100</td>
-                        <td>$500.00</td>
+                        <td>{{ station.Station }}</td>
+                        <td>{{ station.InFlow }}</td>
+                        <td>{{ station.OutFlow }}</td>
+                        <td>{{ station.NetFlow }}</td>
+                        <td>{{ station.Revenue }}</td>
                     </tr>
-                    <tr>
-                        <td>Station 2</td>
-                        <td>750</td>
-                        <td>500</td>
-                        <td>250</td>
-                        <td>$1250.00</td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
+        </div>
     </div>
 </div>
 {% endblock %}
