@@ -53,22 +53,21 @@
 
 <script>
 $(function () {
+    var jsonBreezecard = null;
+    var URL = '/card-management-passenger';
+
     $('#cards-table').on('click', '.clickable-row', function(event) {
         $(this).removeClass('active');
         $(this).addClass('selected').siblings().removeClass('selected');
-        var breezecard = $(this).find('td:first-child').text()
+        breezecard = $(this).find('td:first-child').text()
+        jsonBreezecard = {"breezecardNum":breezecard}
     });
 
-    $.ajax({
+    $.post({
         url: '/card-management-passenger',
-        data: breezecard.serialize(),
-        type: 'POST',
+        data: jsonBreezecard,
         success: function(response) {
-            $('#breezecard-value').text(response)
-        },
-        error: function(error) {
-            console.log(error);
-        }
+            console.log(response)},
     });
 });
 </script>

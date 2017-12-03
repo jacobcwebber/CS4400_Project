@@ -20,14 +20,14 @@
                     <span id="breezecard-value"></span> <p></p>
                 </div>
                 <div class="form-group">
-                    <span style="display: inline-block; width: 100px">Starting at</span>
+                    <span style="display: inline-block; width: 100px; ">Starting at</span>
                     {{render_field(form.start, id="start-trip", style="width: 200px", class_="form-control input-sm")}}
-                    <a id="begin-trip">Begin Trip</a> <p></p>
+                    <button class="btn btn-link" style="padding: 0" id="begin-trip">Begin Trip</button> <p></p>
                 </div>
                 <div class="form-group">
                     <span style="display: inline-block; width: 100px">Ending at</span>
                     {{render_field(form.end, style="width: 200px", class_="form-control input-sm")}}
-                    <a id="end-trip" href="">End Trip</a> <p></p>
+                    <button class="btn btn-link" style="padding: 0" id="end-trip">End Trip</button> <p></p>
                 </div>
                 <center><div class="form-group">
                     <a href="/trip-history">View Trip History</a>

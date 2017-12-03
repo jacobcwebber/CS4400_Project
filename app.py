@@ -395,7 +395,7 @@ def card_management_passenger():
     cur = connection.cursor()
     cur.execute("SELECT BreezecardNum, Value "
                 "FROM Breezecard "
-                "WHERE Owner = %s AND BreezecardNum NOT IN (SELECT DISTINCT BreezecardNum FROM Conflict)" 
+                "WHERE Owner = %s AND BreezecardNum NOT IN (SELECT DISTINCT BreezecardNum FROM Conflict)"
                 ,session['username'])
     cards = cur.fetchall()
 
@@ -442,8 +442,7 @@ def card_management_passenger():
 
         elif request.form['action'] == 'add-value':
             value = request.form['value']
-
-
+            breezecard = request.data
 
     return render_template('card_management_passenger.html', form=form, cards = cards)
 
@@ -478,10 +477,6 @@ def trip_history():
 @app.errorhandler(404)
 def not_found(error):
     return render_template('error.html'), 404
-
-@app.route('/getmethod/<jsdata>')
-def get_javascript_data(jsdata):
-    return jsdata
 
 if __name__ == '__main__':
     app.secret_key='supersecretkey'
