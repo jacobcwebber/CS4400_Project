@@ -4,7 +4,7 @@
 <div class="panel panel-default h-v-center" style="width: 700px">
     <div class="panel-heading"><b>Suspended Cards</b></div>
     <div class="panel-body">
-        <table class="table table-bordered table-hover">
+        <table id="suspended-cards-table" class="table table-bordered table-hover">
             <thead>
                 <th>Card #</th>
                 <th>New Owner</th>
@@ -13,7 +13,7 @@
             </thead>
             <tbody>
                {% for card in cards %}
-                <tr>
+                <tr class="clickable-row">
                     <td>{{ card.BreezecardNum }}</td>
                     <td>{{ card.NewOwner }}</td>
                     <td>{{ card.DateSuspended }}</td>
@@ -24,11 +24,40 @@
         </table>
         <center>
             <form method="post" action = "">
-                <a class='btn btn-primary'>Assign Selected Card to New Owner</a>
+                <input id="new-owner-button" class="btn btn-primary" type="submit" name="action" value="Assign Selected Card to New Owner">
             </form> <p></p>
             <form method="post" action ="">
                 <a class='btn btn-primary'>Assign Selected Card to Previous Owner</a>
             </form> <p></p>
             <div style="font-size: 12px;">Assigning the card to an Owner will unlock all accounts conflicted on the same Breezecard</div>
         </center>
+    </div>
+</div>
+
+<script>
+var number = null
+var newOwner = null
+var previousOwner = null
+$('#suspended-cards-table').on('click', '.clickable-row', function(event) {
+    $(this).removeClass('active');
+    $(this).addClass('selected').siblings().removeClass('selected');
+    number = $(this).find('td:first-child').text();
+    newOwner = $(this).find('td:nth-child(2)').text();
+    previousOwner = $(this).find('td:last-child').text();
+});
+
+$('#new-owner-button').on('click', function( event ) {
+    $.ajax({
+        url: '/assign-new-owner',
+        data: {number: number, newOwner: newOwner},
+        type: 'POST',
+        success: function(response) {
+            console.log(response)
+        },
+        error: function(error) {
+            console.log(error);
+        }
+    });
+});
+</script>
 {% endblock %}

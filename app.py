@@ -378,6 +378,7 @@ def station_detail(id):
     cur.close()
 
     form.fare.data = str(station['Fare'])
+    form.closedStatus.data = not station['ClosedStatus']
 
     if request.method == 'POST':
         fare = request.form['fare']
@@ -397,6 +398,13 @@ def station_detail(id):
         return redirect(url_for('station_management'))
 
     return render_template('station_detail.html', form=form, station=station)
+
+@app.route('/assign-new-owner', methods=["POST"])
+def assign_new_owner():
+    flash(newOwner, 'success')
+    return redirect(url_for('card_management_admin'))
+
+    #cur = connection.cursor()
 
 @app.route('/suspended-cards', methods =['POST', 'GET'])
 @is_logged_in
