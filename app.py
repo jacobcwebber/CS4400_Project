@@ -435,9 +435,24 @@ def assign_owner():
     newOwner = request.form['newOwner']
     previousOwner = request.form['previousOwner']
     assignTo = request.form['assignTo']
-
+    #assignTo == 1; assign to NEW owner
+    cur = connection.cursor()
+    if assignTo== 1:
+        cur.execute("UPDATE Breezecard SET Owner = %s "
+            "WHERE BreezecardNum = %s"
+            , (number,newOwner))
+        cur.execute("DELETE FROM Conflict WHERE BreezecardNum = %s"
+            , number)
+    else:
+        cur.execute("UPDATE Breezecard SET Owner = %s "
+            "WHERE BreezecardNum = %s"
+            , (number,previousOwner))
+        cur.execute("DELETE FROM Conflict WHERE BreezecardNum = %s"
+            , number)
+    connection.commit()
+    cur.close()
     print(number + newOwner + previousOwner + assignTo, file=sys.stderr)
-    return None
+    return render_template('suspended_cards.html', cards=cards)
 
 @app.route('/suspended-cards', methods =['POST', 'GET'])
 @is_logged_in
@@ -462,21 +477,38 @@ class AdminCardManagementForm(Form):
 def set_value():
     number = request.form['number']
     setValueTo = request.form['setValueTo']
-
-    #THIS IS WORKING
-
+    cur = connection.cursor()
+    try:
+        setValueTo = float(setValueTo)
+        cur.execute("UPDATE Breezecard SET Value = %s "
+        "WHERE BreezecardNum = %s",
+        (setValueTo, number))
+    except:
+        flash("Error. Value must be a number between 0 and 1000.")
+    connection.commit()
+    cursor.close()
     print(number + setValueTo, file=sys.stderr)
-    return None
+    return redirect(url_for('card_management_admin'))
 
 @app.route('/transfer-owner', methods=["POST"])
 def transfer_owner():
     number = request.form['number']
     transferTo = request.form['transferTo']
-
-    ##THIS IS WORKING
+    cur = connection.cursor()
+    try:
+        cur.execute("UPDATE Breezecard Set Owner = %s "
+                    "WHERE BreezecardNum = %s"
+                    , (transferTo, number))
+        cur.execute("DELETE FROM Conflict "
+                    "WHERE BreezecardNum = %s"
+                    , number)
+    except:
+        flash("Error. Invalid Input")
+    connection.commit()
+    cursor.close()
 
     print(number + transferTo, file=sys.stderr)
-    return None
+    return redirect(url_for('card_management_admin'))
 
 @app.route('/card-management-admin', methods = ['POST', 'GET'])
 @is_logged_in
@@ -541,7 +573,7 @@ def card_management_admin():
                     card['Owner'] = 'Suspended'
                 if len(suspendedCards) > 0:
                     allCards.extend(suspendedCards)
-        flash('Filter has been updated.', 'success')
+        flash('Filter has been updated.' + str(suspended) + " " + str(suspendedCards), 'success')
         cur.close()
         return render_template('card_management_admin.html', form=form, cards=allCards)
 
@@ -551,22 +583,52 @@ class FlowReportForm(Form):
     start = StringField('')
     end = StringField('')
 
-@app.route('/flow-report')
+@app.route('/flow-report', methods = ['POST', 'GET'])
 @is_logged_in
 @is_admin
 def flow_report():
     form = FlowReportForm(request.form)
     cur = connection.cursor()
-    cur.execute("Select S.Name As Station, IFNULL(PIn.PassengersIn,0) AS InFlow, IFNULL(POut.PassengersOut,0) AS OutFlow, IFNULL(PIn.PassengersIN,0) - IFNULL(POut.PassengersOut,0) AS NetFlow, IFNULL(PIn.Revenue, 0) AS Revenue "
+    cur.execute("SELECT S.Name As Station, IFNULL(PIn.PassengersIn,0) AS InFlow, IFNULL(POut.PassengersOut,0) AS OutFlow, IFNULL(PIn.PassengersIN,0) - IFNULL(POut.PassengersOut,0) AS NetFlow, IFNULL(PIn.Revenue, 0) AS Revenue "
                 "FROM (Station as S "
                 "LEFT JOIN (SELECT DISTINCT StartsAt AS StartStation, COUNT(Fare) As PassengersIn, SUM(Fare) As Revenue "
                 "FROM Trip GROUP BY StartsAt) AS PIn ON S.StopID = PIn.StartStation) "
                 "LEFT JOIN (SELECT DISTINCT EndsAt AS EndStation, COUNT(Fare) As PassengersOut FROM Trip GROUP BY EndsAt) AS POut ON S.StopID = POut.EndStation "
-                "WHERE PIn.PassengersIn >0 OR POut.PassengersOut >0 ;")
-
+                "WHERE PIn.PassengersIn >0 OR POut.PassengersOut >0")
     flowReport = cur.fetchall()
+    if request.method == 'POST':
+        if request.form['action'] == 'reset':
+            form.start.data = ''
+            form.end.data = ''
+            cur.execute("SELECT S.Name As Station, IFNULL(PIn.PassengersIn,0) AS InFlow, IFNULL(POut.PassengersOut,0) as OutFlow, IFNULL(PIn.PassengersIN,0) - IFNULL(POut.PassengersOut,0) AS NetFlow, IFNULL(PIn.Revenue, 0) AS Revenue "
+                        "FROM (Station as S LEFT JOIN (SELECT DISTINCT StartsAt AS StartStation, COUNT(Fare) As PassengersIn, SUM(Fare) As Revenue "
+                        "FROM Trip GROUP BY StartsAt) AS PIn ON S.StopID = PIn.StartStation) LEFT JOIN (SELECT DISTINCT EndsAt AS EndStation, COUNT(Fare) As PassengersOut "
+                        "FROM Trip GROUP BY EndsAt) AS POut ON S.StopID = POut.EndStation "
+                        "WHERE PIn.PassengersIn >0 OR POut.PassengersOut >0")
+            flowReport = cur.fetchall()
+            cur.close()
+            flash('Fliter has been reset', 'success')
+        else:
+            # try:
+                startTime = request.form['start']
+                endTime = request.form['end']
+                if len(startTime) == 0:
+                    startTime = '1950-01-01 00:00:00'
+                if len(endTime) == 0:
+                    endTime = '2020-12-31 23:59:59'
+                cur.execute("SELECT S.Name AS Station, IFNULL(PIn.PassengersIn,0) AS InFlow, IFNULL(POut.PassengersOut,0) as OutFlow, IFNULL(PIn.PassengersIN,0) - IFNULL(POut.PassengersOut,0) AS NetFlow, IFNULL(PIn.Revenue, 0) AS Revenue "
+                        "FROM (Station as S LEFT JOIN (SELECT DISTINCT StartsAt AS StartStation, COUNT(Fare) As PassengersIn, SUM(Fare) As Revenue "
+                        "FROM Trip wHERE StartTime BETWEEN %s AND %s GROUP BY StartsAt) AS PIn ON S.StopID = PIn.StartStation) LEFT JOIN (SELECT DISTINCT EndsAt AS EndStation, COUNT(Fare) As PassengersOut "
+                        "FROM Trip GROUP BY EndsAt) AS POut ON S.StopID = POut.EndStation "
+                        "WHERE PIn.PassengersIn >0 OR POut.PassengersOut > 0"
+                        , (datetime.datetime.strptime(startTime, '%Y-%m-%d %H:%M:%S'), datetime.datetime.strptime(endTime, '%Y-%m-%d %H:%M:%S')))
+                flowReport = cur.fetchall()
+                flash('Filter Updated', 'success')
+                cur.close()
+            # except:
+            #     flash('Incorrect time format. Please put time as YYYY-MM-DD HH:MM:SS', 'danger')
+        return render_template('flow_report.html', form=form, flowReport=flowReport)
     cur.close()
-
     return render_template('flow_report.html', form=form, flowReport=flowReport)
 
 class PassengerCardManagementForm(Form):
@@ -688,18 +750,16 @@ def trip_history():
                 "JOIN Station as s2 ON s2.StopID = t.EndsAt "
                 "WHERE b.Owner = %s"
                 , (session['username']))
+            trips = cur.fetchall()
+            flash('Filter reset', 'success')
         else:
             try:
-                print('I am here', file = sys.stderr)
                 startTime = request.form['start']
                 endTime = request.form['end']
                 if len(startTime) == 0:
                     startTime = '1950-01-01 00:00:00'
                 if len(endTime) == 0:
                     endTime = '2020-12-31 23:59:59'
-                print(startTime, file=sys.stderr)
-                print(endTime, file=sys.stderr)
-                print(type(startTime), file = sys.stderr)
                 cur.execute("SELECT t.StartTime, s1.Name AS StartName, s2.Name AS EndName, t.Fare, t.BreezecardNum "
                             "FROM Trip as t LEFT JOIN Breezecard as b ON t.BreezecardNum = b.BreezecardNum "
                             "JOIN Station as s1 ON s1.StopID = t.StartsAt "
@@ -707,12 +767,11 @@ def trip_history():
                             "WHERE b.Owner = %s AND t.StartTime BETWEEN %s AND %s"
                             , (session['username'], datetime.datetime.strptime(startTime, '%Y-%m-%d %H:%M:%S'), datetime.datetime.strptime(endTime, '%Y-%m-%d %H:%M:%S')))
                 trips = cur.fetchall()
-                print('I made it here', file = sys.stderr)
                 cur.close()
-                return render_template('trip_history.html', form=form, trips=trips)
             except:
                 flash('Incorrect time format. Please put time as YYYY-MM-DD HH:MM:SS', 'danger')
-
+            flash('Filter Updated', 'success')
+        return render_template('trip_history.html', form=form, trips=trips)
 
     cur.close()
     return render_template('trip_history.html', form=form, trips=trips)
