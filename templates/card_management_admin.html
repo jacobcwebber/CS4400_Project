@@ -59,10 +59,12 @@
 
 <script>
 var number = null;
+var previousOwner = null;
 $('#card-management-table').on('click', '.clickable-row', function(event) {
     $(this).removeClass('active');
     $(this).addClass('selected').siblings().removeClass('selected');
     number = $(this).find('td:first-child').text();
+    previousOwner = $(this).find('td:last-child').text();
 });
 
 $('#new-value-button').click(function(e) {
@@ -73,6 +75,7 @@ $('#new-value-button').click(function(e) {
 $('#transfer-to-button').click(function(e) {
     transferOwner();
     e.preventDefault();
+    window.location.reload();
 })
 
 function setValue() {
@@ -95,7 +98,8 @@ function transferOwner() {
         url: '/transfer-owner',
         data: {
             number : number,
-            transferTo : $('#transfer-to').val()
+            transferTo : $('#transfer-to').val(),
+            previousOwner : previousOwner
         },
         error: function(error) {
             console.log(error);

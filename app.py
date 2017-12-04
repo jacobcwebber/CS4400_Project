@@ -485,6 +485,10 @@ class AdminCardManagementForm(Form):
 def set_value():
     number = request.form['number']
     setValueTo = request.form['setValueTo']
+<<<<<<< HEAD
+=======
+
+>>>>>>> fdeb5006807c203a0cf5ac78e6a3300888518605
     cur = connection.cursor()
     try:
         setValueTo = float(setValueTo)
@@ -502,6 +506,7 @@ def set_value():
 def transfer_owner():
     number = request.form['number']
     transferTo = request.form['transferTo']
+    previousOwner = request.form['previousOwner']
     cur = connection.cursor()
     try:
         cur.execute("UPDATE Breezecard Set Owner = %s "
