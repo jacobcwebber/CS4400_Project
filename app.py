@@ -277,15 +277,18 @@ def endTrip():
     station = cur.fetchone()
     startId = station['StopID']
 
-    print(breezecard + startId + endId, file=sys.stderr)
-
+    cur.execute("SELECT StartTime "
+                 "FROM Trip "
+                 "WHERE BreezecardNum = %s AND StartsAt = %s "
+                 "ORDER BY StartTime DESC LIMIT 1"
+                 , (breezecard, startId))
+    trip = cur.fetchone()
+    startTime = trip['StartTime']
 
     cur.execute("UPDATE Trip "
                 "SET EndsAt = %s "
-                "WHERE BreezecardNum = %s AND StartTime = (SELECT StartTime "
-                                                          "FROM Trip "
-                                                          "WHERE BreezecardNum = %s, StartsAt = %s ORDER BY Desc LIMIT 1)"
-                , (endId, breezecard, breezecard, startId))
+                "WHERE BreezecardNum = %s AND StartTime = %s"
+                , (endId, breezecard, startTime))
 
     connection.commit()
     cur.close()
