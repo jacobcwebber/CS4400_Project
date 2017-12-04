@@ -577,7 +577,7 @@ def flow_report():
 class PassengerCardManagementForm(Form):
     number = StringField('')
     creditCard = StringField('')
-    value = StringField('')
+    value = StringField('', render_kw={"placeholder": "Enter CC #"})
 
     def validate_number(form, field):
         try:
@@ -586,6 +586,33 @@ class PassengerCardManagementForm(Form):
             raise ValidationError('Breezecard Number must be an integer.')
         if len(str(field.data)) != 16:
             raise ValidationError('Breezecard Number must be 16 digits')
+
+@app.route('/add-value-passenger', methods=['POST'])
+def add_value_passenger():
+    breezecard = request.form['breezecard']
+    value = request.form['value']
+
+    cur = connection.cursor()
+
+    cur.execute("SELECT Value "
+                "FROM Breezecard "
+                "WHERE BreezecardNum = %s"
+                , breezecard)
+    card = cur.fetchone()
+    existingValue = card['Value']
+
+    cur.execute("UPDATE Breezecard "
+                "SET Value = %s "
+                "WHERE BreezecardNum = %s"
+                , (float(existingValue) + float(value), breezecard))
+    connection.commit()
+    cur.close()
+
+    if float(existingValue) + float(value) > 10000:
+        newValue = str(9999.99)
+    else:
+        newValue = str(float(existingValue) + float(value))
+    return json.dumps(newValue)
 
 @app.route('/card-management-passenger', methods = ['POST', 'GET'])
 @is_logged_in
