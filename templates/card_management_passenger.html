@@ -1,7 +1,9 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div>
+<div class="alert alert-danger" id="exceeded-cap" style="display: none; width: 100%;">
+  The value on your Breezecard exceeded $1000, so we only charged you up to that value.
+</div>
 <div class="panel panel-default h-v-center" style="width: 500px;">
     <div class="panel-heading"><b>Manage Cards</b></div>
     <div class="panel-body">
@@ -42,19 +44,26 @@
                     </div>
                     <div class="form-group" style="width: 100%">
                         <span style="display: inline-block; width: 90px;">Value</span>
-                        {{render_field(form.value, id="value", class_="form-control input-sm")}}
+                        {{render_field(form.value, id="value", disabled=true, class_="form-control input-sm")}}
                         <button id="add-value-button" class='btn btn-primary btn-sm' style="float: right" type="submit" name="action" value="add-value">Add Value</button><p></p>
                     </div>
                 </div>
             </div>
         </form>
     </div>
-    </div>
 </div>
 
 <script>
 var breezecard = null;
 var value = null;
+
+$('#cc-number').change(function() {
+    if ($('#cc-number').val().length==16) {
+        $("#value").prop('disabled', false)
+    } else {
+        $("#value").prop('disabled', true)
+    }
+});
 
 $('#cards-table').on('click', '.clickable-row', function(event) {
     $(this).removeClass('active');
@@ -85,7 +94,10 @@ function addValue() {
         },
         success: function(response) {
             var newValue = response.slice(1, -1);
-            $('.selected td:nth-child(2)').text(newValue)
+            $('.selected td:nth-child(2)').text(newValue);
+            if (newValue == "999.99") {
+                  $('#exceeded-cap').css("display", "inline-block")
+            };
         }
     });
 }

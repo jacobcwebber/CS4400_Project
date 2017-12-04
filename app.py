@@ -642,7 +642,7 @@ def flow_report():
 class PassengerCardManagementForm(Form):
     number = StringField('')
     creditCard = StringField('')
-    value = StringField('', render_kw={"placeholder": "Enter CC #"})
+    value = StringField('', render_kw={"placeholder": "Enter 16-digit CC #"})
 
     def validate_number(form, field):
         try:
@@ -673,10 +673,10 @@ def add_value_passenger():
     connection.commit()
     cur.close()
 
-    if float(existingValue) + float(value) > 10000:
-        newValue = str(9999.99)
+    if float(existingValue) + float(value) > 1000:
+        newValue = str(999.99)
     else:
-        newValue = str(float(existingValue) + float(value))
+        newValue = str(round(float(existingValue) + float(value), 2))
     return json.dumps(newValue)
 
 @app.route('/remove-card', methods=['POST'])
@@ -690,6 +690,9 @@ def remove_card():
                 "SET Owner = NULL "
                 "WHERE BreezecardNum = %s"
                 , breezecard)
+    connection.commit()
+    cur.close()
+
     return None
 
 @app.route('/card-management-passenger', methods = ['POST', 'GET'])
@@ -715,7 +718,7 @@ def card_management_passenger():
                             "VALUES (%s, 0.00, %s)"
                             , (breezecardNum, session['username']))
                 connection.commit()
-                flash('Card added.', 'success')
+                cur.close()
                 return redirect(url_for('card_management_passenger'))
 
             except pymysql.IntegrityError:
