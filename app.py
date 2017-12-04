@@ -503,6 +503,7 @@ def set_value():
 def transfer_owner():
     number = request.form['number']
     transferTo = request.form['transferTo']
+    previousOwner = request.form['previousOwner']
     cur = connection.cursor()
     try:
         cur.execute("UPDATE Breezecard Set Owner = %s "
