@@ -20,7 +20,7 @@
                         <tr class="clickable-row">
                             <td>{{ card.BreezecardNum }}</td>
                             <td>{{ card.Value }}</td>
-                            <td><a>Remove</a></td>
+                            <td id="{{card.BreezecardNum}}-rmv"><a>Remove</a></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -37,12 +37,12 @@
                 <div class="panel-body">
                     <div class="form-group">
                         <span style="display: inline-block; width: 90px;">Credit Card #</span>
-                        {{render_field(form.creditCard, class_="form-control input-sm")}} <p></p>
+                        {{render_field(form.creditCard, type='number', id="cc-number", class_="form-control input-sm")}} <p></p>
                     </div>
                     <div class="form-group" style="width: 100%">
                         <span style="display: inline-block; width: 90px;">Value</span>
-                        {{render_field(form.value, class_="form-control input-sm")}}
-                        <button class='btn btn-primary btn-sm' style="float: right" type="submit" name="action" value="add-value">Add Value</button><p></p>
+                        {{render_field(form.value, id="value", class_="form-control input-sm")}}
+                        <button id="add-value-button" class='btn btn-primary btn-sm' style="float: right" type="submit" name="action" value="add-value">Add Value</button><p></p>
                     </div>
                 </div>
             </div>
@@ -52,23 +52,43 @@
 </div>
 
 <script>
-$(function () {
-    var jsonBreezecard = null;
-    var URL = '/card-management-passenger';
+var breezecard = null;
+var value = null;
+//var remove
 
-    $('#cards-table').on('click', '.clickable-row', function(event) {
-        $(this).removeClass('active');
-        $(this).addClass('selected').siblings().removeClass('selected');
-        breezecard = $(this).find('td:first-child').text()
-        jsonBreezecard = {"breezecardNum":breezecard}
-    });
-
-    $.post({
-        url: '/card-management-passenger',
-        data: jsonBreezecard,
-        success: function(response) {
-            console.log(response)},
-    });
+$('#cards-table').on('click', '.clickable-row', function(event) {
+    $(this).removeClass('active');
+    $(this).addClass('selected').siblings().removeClass('selected');
+    breezecard = $(this).find('td:first-child').text()
 });
+
+$('#add-value-button').click(function(e) {
+    addValue();
+    e.preventDefault();
+});
+
+function addValue() {
+    value = $('#value').val();
+    $.ajax({
+        type: 'POST',
+        url: '/add-value-passenger',
+        type: 'POST',
+        data: {
+            breezecard : breezecard,
+            value : value
+        },
+        success: function(response) {
+            var newValue = response.slice(1, -1);
+            $('.selected td:nth-child(2)').text(newValue)
+        }
+    });
+}
+
+// alert($('#cc-number').val())
+// $('#cc-number').onchange = function() {
+//     if $('#cc-number').val().length == 16 {
+//         $('#value').prop('disabled', false);
+//     }
+// };
 </script>
 {% endblock %}

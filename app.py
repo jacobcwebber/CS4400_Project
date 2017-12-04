@@ -251,16 +251,21 @@ def beginTrip():
 
     if float(fare) > float(balance):
         cur.close()
-        flash('You do not have enough money on your Breezecard to take this trip.', 'danger')
-        return redirect(url_for('passenger'))
+        return json.dumps(str("low"))
 
     cur.execute("INSERT INTO Trip (Fare, BreezecardNum, StartsAt, EndsAt)"
                 "VALUES (%s, %s, %s, %s)"
                 , (float(fare), breezecard, stopId, None))
 
+    cur.execute("UPDATE Breezecard "
+                "SET Value = %s - %s "
+                "WHERE BreezecardNum = %s"
+                , (float(balance), float(fare), breezecard))
+
     connection.commit()
     cur.close()
-    return None
+
+    return json.dumps(str(float(balance) - float(fare)))
 
 @app.route('/end-trip', methods=['POST'])
 def endTrip():
@@ -277,15 +282,18 @@ def endTrip():
     station = cur.fetchone()
     startId = station['StopID']
 
-    print(breezecard + startId + endId, file=sys.stderr)
-
+    cur.execute("SELECT StartTime "
+                 "FROM Trip "
+                 "WHERE BreezecardNum = %s AND StartsAt = %s "
+                 "ORDER BY StartTime DESC LIMIT 1"
+                 , (breezecard, startId))
+    trip = cur.fetchone()
+    startTime = trip['StartTime']
 
     cur.execute("UPDATE Trip "
                 "SET EndsAt = %s "
-                "WHERE BreezecardNum = %s AND StartTime = (SELECT StartTime "
-                                                          "FROM Trip "
-                                                          "WHERE BreezecardNum = %s, StartsAt = %s ORDER BY Desc LIMIT 1)"
-                , (endId, breezecard, breezecard, startId))
+                "WHERE BreezecardNum = %s AND StartTime = %s"
+                , (endId, breezecard, startTime))
 
     connection.commit()
     cur.close()
@@ -477,6 +485,7 @@ class AdminCardManagementForm(Form):
 def set_value():
     number = request.form['number']
     setValueTo = request.form['setValueTo']
+<<<<<<< HEAD
     cur = connection.cursor()
     try:
         setValueTo = float(setValueTo)
@@ -507,8 +516,8 @@ def transfer_owner():
     connection.commit()
     cursor.close()
 
-    print(number + transferTo, file=sys.stderr)
     return redirect(url_for('card_management_admin'))
+
 
 @app.route('/card-management-admin', methods = ['POST', 'GET'])
 @is_logged_in
@@ -561,7 +570,7 @@ def card_management_admin():
                     "WHERE BreezecardNum NOT IN (SELECT BreezecardNum FROM Conflict) "
                     "AND Owner IS NULL AND BreezecardNum LIKE %s AND Value >= %s AND Value <= %s"
                     , ( cardNumber, float(lowerValue), float(upperValue)))
-                noneCards = cur.fetchall() 
+                noneCards = cur.fetchall()
                 allCards.extend(noneCards)
             if suspended == 1:
                 cur.execute("SELECT DISTINCT B.BreezecardNum, B.Value "
@@ -634,7 +643,7 @@ def flow_report():
 class PassengerCardManagementForm(Form):
     number = StringField('')
     creditCard = StringField('')
-    value = StringField('')
+    value = StringField('', render_kw={"placeholder": "Enter CC #"})
 
     def validate_number(form, field):
         try:
@@ -643,6 +652,33 @@ class PassengerCardManagementForm(Form):
             raise ValidationError('Breezecard Number must be an integer.')
         if len(str(field.data)) != 16:
             raise ValidationError('Breezecard Number must be 16 digits')
+
+@app.route('/add-value-passenger', methods=['POST'])
+def add_value_passenger():
+    breezecard = request.form['breezecard']
+    value = request.form['value']
+
+    cur = connection.cursor()
+
+    cur.execute("SELECT Value "
+                "FROM Breezecard "
+                "WHERE BreezecardNum = %s"
+                , breezecard)
+    card = cur.fetchone()
+    existingValue = card['Value']
+
+    cur.execute("UPDATE Breezecard "
+                "SET Value = %s "
+                "WHERE BreezecardNum = %s"
+                , (float(existingValue) + float(value), breezecard))
+    connection.commit()
+    cur.close()
+
+    if float(existingValue) + float(value) > 10000:
+        newValue = str(9999.99)
+    else:
+        newValue = str(float(existingValue) + float(value))
+    return json.dumps(newValue)
 
 @app.route('/card-management-passenger', methods = ['POST', 'GET'])
 @is_logged_in
@@ -726,7 +762,7 @@ def card_management_passenger():
 
 class TripHistoryForm(Form):
     start =StringField('')
-    end = StringField('') 
+    end = StringField('')
 @app.route('/trip-history', methods = ['POST', 'GET'])
 @is_logged_in
 def trip_history():

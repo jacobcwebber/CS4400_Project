@@ -1,6 +1,9 @@
 {% extends 'layout.html' %}
 
 {% block body %}
+<div class="alert alert-danger" id="low-on-money" style="display: none;">
+  You don't have enough money on your Buzzcard for this trip.
+</div>
 <div class="panel panel-default h-v-center" style="width: 500px">
     <div class="panel-heading"><b>Welcome to MARTA</b></div>
         <div class="panel-body">
@@ -52,9 +55,6 @@ function changeValue() {
             var response = response.slice(1, -1);
             $('#breezecard-value').text(response);
         },
-        error: function(error) {
-            console.log(error);
-        }
     });
 }
 
@@ -86,6 +86,23 @@ function startTrip() {
             balance : $('#breezecard-value').text(),
             breezecard : $('#breezecard').val(),
             start : $('#start').val()
+        },
+        success: function(response) {
+            if(response == '"low"') {
+                $('#low-on-money').css("display", "inline-block")
+                $('#low-on-money').css("width", "100%")
+                $('#start-trip').prop('disabled', false);
+                $('#begin-trip').text('Begin Trip');
+                $('#begin-trip').css('cursor', 'pointer');
+                $('#begin-trip').css('color', '#428BCA');
+                $('#begin-trip').prop('disabled', false);
+                $('#end-trip').css('display', 'none');
+            }
+            else {
+                var newValue = response.slice(1, -1);
+                $('#low-on-money').css("display", "none")
+                $('#breezecard-value').text(newValue);
+            }
         },
         error: function(e) {
             console.log(e);
