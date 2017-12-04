@@ -53,12 +53,14 @@ $('#new-owner-button').click(function(e) {
     assignToNew = 1;
     assignOwner();
     e.preventDefault();
+    window.location.reload();
 })
 
 $('#previous-owner-button').click(function(e) {
     assignToNew = 0;
     assignOwner();
     e.preventDefault();
+    window.location.reload();
 })
 
 function assignOwner() {

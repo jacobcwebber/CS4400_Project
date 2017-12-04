@@ -445,22 +445,21 @@ def assign_owner():
     assignTo = request.form['assignTo']
     #assignTo == 1; assign to NEW owner
     cur = connection.cursor()
-    if assignTo== 1:
+    if assignTo== "1":
         cur.execute("UPDATE Breezecard SET Owner = %s "
             "WHERE BreezecardNum = %s"
-            , (number,newOwner))
+            , (newOwner,number))
         cur.execute("DELETE FROM Conflict WHERE BreezecardNum = %s"
             , number)
     else:
         cur.execute("UPDATE Breezecard SET Owner = %s "
             "WHERE BreezecardNum = %s"
-            , (number,previousOwner))
+            , (previousOwner,number))
         cur.execute("DELETE FROM Conflict WHERE BreezecardNum = %s"
             , number)
     connection.commit()
     cur.close()
-    print(number + newOwner + previousOwner + assignTo, file=sys.stderr)
-    return render_template('suspended_cards.html', cards=cards)
+    return redirect(url_for('suspended_cards'))
 
 @app.route('/suspended-cards', methods =['POST', 'GET'])
 @is_logged_in
@@ -485,10 +484,6 @@ class AdminCardManagementForm(Form):
 def set_value():
     number = request.form['number']
     setValueTo = request.form['setValueTo']
-<<<<<<< HEAD
-=======
-
->>>>>>> fdeb5006807c203a0cf5ac78e6a3300888518605
     cur = connection.cursor()
     try:
         setValueTo = float(setValueTo)
