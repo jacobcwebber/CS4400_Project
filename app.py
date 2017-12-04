@@ -487,7 +487,6 @@ def card_management_admin():
                     "AND Owner LIKE %s AND BreezecardNum LIKE %s AND Value >= %s AND Value <= %s"
                     , ( ownerName, cardNumber, float(lowerValue), float(upperValue)))
             allCards = cur.fetchall()
-<<<<<<< HEAD
             if ownerName == "%":
                 cur.execute("SELECT * "
                     "FROM Breezecard "
@@ -496,8 +495,6 @@ def card_management_admin():
                     , ( cardNumber, float(lowerValue), float(upperValue)))
                 noneCards = cur.fetchall() 
                 allCards.extend(noneCards)
-=======
->>>>>>> dc80b27ed9f24e863831882028ad2cd321d7fb82
             if suspended == 1:
                 cur.execute("SELECT DISTINCT B.BreezecardNum, B.Value "
                             "FROM Breezecard AS B JOIN Conflict AS C "
@@ -630,8 +627,8 @@ def card_management_passenger():
     return render_template('card_management_passenger.html', form=form, cards = cards)
 
 class TripHistoryForm(Form):
-    start =DateTimeField('')
-    end = DateTimeField('') 
+    start =StringField('')
+    end = StringField('') 
 @app.route('/trip-history', methods = ['POST', 'GET'])
 @is_logged_in
 def trip_history():
@@ -657,22 +654,28 @@ def trip_history():
                 , (session['username']))
         else:
             try:
+                print('I am here', file = sys.stderr)
                 startTime = request.form['start']
                 endTime = request.form['end']
                 if len(startTime) == 0:
-                    startTime = '1950-1-1 00:00:00'
+                    startTime = '1950-01-01 00:00:00'
                 if len(endTime) == 0:
-                    endTime = "2020 12-31 23:59:59"
-                cur.execute("SELECT t.StartTime, s1.Name, s2.Name, t.Fare, t.BreezecardNum "
+                    endTime = '2020-12-31 23:59:59'
+                print(startTime, file=sys.stderr)
+                print(endTime, file=sys.stderr)
+                print(type(startTime), file = sys.stderr)
+                cur.execute("SELECT t.StartTime, s1.Name AS StartName, s2.Name AS EndName, t.Fare, t.BreezecardNum "
                             "FROM Trip as t LEFT JOIN Breezecard as b ON t.BreezecardNum = b.BreezecardNum "
                             "JOIN Station as s1 ON s1.StopID = t.StartsAt "
                             "JOIN Station as s2 ON s2.StopID = t.EndsAt "
                             "WHERE b.Owner = %s AND t.StartTime BETWEEN %s AND %s"
-                            , session['username'], startTime, endTime)
+                            , (session['username'], datetime.datetime.strptime(startTime, '%Y-%m-%d %H:%M:%S'), datetime.datetime.strptime(endTime, '%Y-%m-%d %H:%M:%S')))
+                trips = cur.fetchall()
+                print('I made it here', file = sys.stderr)
                 cur.close()
                 return render_template('trip_history.html', form=form, trips=trips)
             except:
-                flash('Incorrect time format', 'danger')
+                flash('Incorrect time format. Please put time as YYYY-MM-DD HH:MM:SS', 'danger')
 
 
     cur.close()
