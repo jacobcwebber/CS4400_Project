@@ -71,6 +71,7 @@ $('#begin-trip').click(function(e) {
 $('#end-trip').click(function(e) {
     $('#start-trip').prop('disabled', false);
     $('#begin-trip').text('Begin Trip');
+    $('#begin-trip').css('cursor', 'pointer');
     $('#begin-trip').css('color', '#428BCA');
     $('#begin-trip').prop('disabled', false);
     $(this).css('display', 'none');
@@ -86,9 +87,6 @@ function startTrip() {
             breezecard : $('#breezecard').val(),
             start : $('#start').val()
         },
-        success: function(data) {
-            alert(data.balance)
-        },
         error: function(e) {
             console.log(e);
         }
@@ -97,11 +95,12 @@ function startTrip() {
 
 function endTrip() {
     $.ajax({
-        url: '/end-trip',
-        data: {},
         type: 'POST',
-        success: function(response) {
-            console.log(response);
+        url: '/end-trip',
+        data: {
+            breezecard : $('#breezecard').val(),
+            end : $('#end').val(),
+            start : $('#start').val()
         },
         error: function(error) {
             console.log(error);

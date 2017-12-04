@@ -35,6 +35,8 @@
             </form>
         </center>
     </div>
+</div>
+
 <script>
 $('#station-table').on('click', '.clickable-row', function(event) {
     $(this).removeClass('active');
@@ -43,12 +45,6 @@ $('#station-table').on('click', '.clickable-row', function(event) {
     var href = "/station-detail/" + stopId;
     $('#view-station').attr('href', href)
 });
-
-$('#view-station').on('click', function(e) {
-    alert($SCRIPT_ROOT + "/station-detail/" + stopId)
-    location.href = ("http://stackoverflow.com");
-    window.location.replace("/station-detail/" + stopId);
-})
-
 </script>
+
 {% endblock %}
