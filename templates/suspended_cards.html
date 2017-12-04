@@ -4,7 +4,8 @@
 <div class="panel panel-default h-v-center" style="width: 700px">
     <div class="panel-heading"><b>Suspended Cards</b></div>
     <div class="panel-body">
-        <table class="table table-bordered table-hover" id="suspended-cards-table-table" data-toggle="table" data-sort-order="desc">
+        <div class="table-responsive" style="max-height: 300px">
+        <table class="table table-bordered table-hover" id="suspended-cards-table" data-toggle="table" data-sort-order="desc">
             <thead>
                 <th data-sortable="true">Card #</th>
                 <th data-sortable="true">New Owner</th>
@@ -21,13 +22,14 @@
                 </tr>
                 {% endfor %}
             </tbody>
-        </table> <p></p>
+        </table>
+        </div><p></p>
         <center>
             <form method="post" action = "">
-                <input id="new-owner-button" class="btn btn-primary" type="submit" name="action" value="Assign Selected Card to New Owner">
+                <button id="new-owner-button" class="btn btn-primary" type="submit" name="action">Assign Selected Card to New Owner</button>
             </form> <p></p>
             <form method="post" action ="">
-                <a class='btn btn-primary'>Assign Selected Card to Previous Owner</a>
+                <button id="previous-owner-button" class="btn btn-primary" type="submit" name="action">Assign Selected Card to Previous Owner</button>
             </form> <p></p>
             <div style="font-size: 12px;">Assigning the card to an Owner will unlock all accounts conflicted on the same Breezecard</div>
         </center>
@@ -35,9 +37,10 @@
 </div>
 
 <script>
-var number = null
-var newOwner = null
-var previousOwner = null
+var number = null;
+var newOwner = null;
+var previousOwner = null;
+var assignToNew = null;
 $('#suspended-cards-table').on('click', '.clickable-row', function(event) {
     $(this).removeClass('active');
     $(this).addClass('selected').siblings().removeClass('selected');
@@ -46,18 +49,33 @@ $('#suspended-cards-table').on('click', '.clickable-row', function(event) {
     previousOwner = $(this).find('td:last-child').text();
 });
 
-$('#new-owner-button').on('click', function( event ) {
+$('#new-owner-button').click(function(e) {
+    assignToNew = 1;
+    assignOwner();
+    e.preventDefault();
+})
+
+$('#previous-owner-button').click(function(e) {
+    assignToNew = 0;
+    assignOwner();
+    e.preventDefault();
+})
+
+function assignOwner() {
     $.ajax({
-        url: '/assign-new-owner',
-        data: {number: number, newOwner: newOwner},
         type: 'POST',
-        success: function(response) {
-            console.log(response)
+        url: '/assign-owner',
+        data: {
+            number : number,
+            newOwner : newOwner,
+            previousOwner : previousOwner,
+            assignTo : assignToNew
         },
         error: function(error) {
             console.log(error);
         }
     });
-});
+}
+
 </script>
 {% endblock %}

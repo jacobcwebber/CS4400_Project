@@ -240,43 +240,56 @@ def beginTrip():
     balance = request.form['balance']
 
     cur = connection.cursor()
-    cur.execute("SELECT Fare "
+    cur.execute("SELECT Fare, StopID "
                 "FROM Station "
                 "WHERE Name = %s"
                 , startStation)
 
     station = cur.fetchone()
     fare = station['Fare']
+    stopId = station['StopID']
 
     if float(fare) > float(balance):
+        cur.close()
         flash('You do not have enough money on your Breezecard to take this trip.', 'danger')
         return redirect(url_for('passenger'))
 
-    cur.execute("INSERT INTO Trip (Fare, Breezecard, StartsAt, EndsAt)"
+    cur.execute("INSERT INTO Trip (Fare, BreezecardNum, StartsAt, EndsAt)"
                 "VALUES (%s, %s, %s, %s)"
-                , (float(fare), breezecard, startStation, None))
+                , (float(fare), breezecard, stopId, None))
 
     connection.commit()
     cur.close()
-
-    return redirect(url_for('passenger'))
-
+    return None
 
 @app.route('/end-trip', methods=['POST'])
 def endTrip():
     breezecard = request.form['breezecard']
     startStation = request.form['start']
-    endStation = request.form['end']
+    endId = request.form['end']
+
     cur = connection.cursor()
+
+    cur.execute("SELECT StopID "
+                "FROM Station "
+                "WHERE Name = %s"
+                , startStation)
+    station = cur.fetchone()
+    startId = station['StopID']
+
+    print(breezecard + startId + endId, file=sys.stderr)
+
 
     cur.execute("UPDATE Trip "
                 "SET EndsAt = %s "
                 "WHERE BreezecardNum = %s AND StartTime = (SELECT StartTime "
                                                           "FROM Trip "
                                                           "WHERE BreezecardNum = %s, StartsAt = %s ORDER BY Desc LIMIT 1)"
-                , (endStation, breezecard, breezecard, startStation))
+                , (endId, breezecard, breezecard, startId))
+
     connection.commit()
     cur.close()
+    return None
 
 @app.route('/passenger', methods= ['POST', 'GET'])
 @is_logged_in
@@ -416,12 +429,15 @@ def station_detail(id):
 
     return render_template('station_detail.html', form=form, station=station)
 
-@app.route('/assign-new-owner', methods=["POST"])
-def assign_new_owner():
-    flash(newOwner, 'success')
-    return redirect(url_for('card_management_admin'))
+@app.route('/assign-owner', methods=["POST"])
+def assign_owner():
+    number = request.form['number']
+    newOwner = request.form['newOwner']
+    previousOwner = request.form['previousOwner']
+    assignTo = request.form['assignTo']
 
-    #cur = connection.cursor()
+    print(number + newOwner + previousOwner + assignTo, file=sys.stderr)
+    return None
 
 @app.route('/suspended-cards', methods =['POST', 'GET'])
 @is_logged_in
@@ -441,6 +457,26 @@ class AdminCardManagementForm(Form):
     show_suspended = BooleanField('')
     set_value = StringField('')
     transfer_to = StringField('')
+
+@app.route('/set-value', methods=["POST"])
+def set_value():
+    number = request.form['number']
+    setValueTo = request.form['setValueTo']
+
+    #THIS IS WORKING
+
+    print(number + setValueTo, file=sys.stderr)
+    return None
+
+@app.route('/transfer-owner', methods=["POST"])
+def transfer_owner():
+    number = request.form['number']
+    transferTo = request.form['transferTo']
+
+    ##THIS IS WORKING
+
+    print(number + transferTo, file=sys.stderr)
+    return None
 
 @app.route('/card-management-admin', methods = ['POST', 'GET'])
 @is_logged_in
