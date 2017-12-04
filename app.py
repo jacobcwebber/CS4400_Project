@@ -485,7 +485,10 @@ class AdminCardManagementForm(Form):
 def set_value():
     number = request.form['number']
     setValueTo = request.form['setValueTo']
+<<<<<<< HEAD
+=======
 
+>>>>>>> fdeb5006807c203a0cf5ac78e6a3300888518605
     cur = connection.cursor()
     try:
         setValueTo = float(setValueTo)
