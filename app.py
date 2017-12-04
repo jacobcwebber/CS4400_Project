@@ -679,6 +679,19 @@ def add_value_passenger():
         newValue = str(float(existingValue) + float(value))
     return json.dumps(newValue)
 
+@app.route('/remove-card', methods=['POST'])
+def remove_card():
+    breezecard = request.form['breezecard']
+    print(breezecard, file=sys.stderr)
+
+    cur = connection.cursor()
+
+    cur.execute("UPDATE Breezecard "
+                "SET Owner = NULL "
+                "WHERE BreezecardNum = %s"
+                , breezecard)
+    return None
+
 @app.route('/card-management-passenger', methods = ['POST', 'GET'])
 @is_logged_in
 @is_passenger

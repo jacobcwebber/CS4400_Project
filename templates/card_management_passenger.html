@@ -6,31 +6,32 @@
     <div class="panel-heading"><b>Manage Cards</b></div>
     <div class="panel-body">
     {% from "includes/_formhelpers.html" import render_field %}
-        <label>Breeze Cards</label>
+        <label>Breeze Cards</label> <p></p>
+        <form method="POST" action="" style="width: 100%">
         <div class="form-group">
             <div class="table-responsive" style="max-height: 170px;">
                 <table class="table table-bordered table-hover" id="cards-table" data-toggle="table" data-sort-order="desc">
                     <thead>
                         <th data-sortable="true">Card Number</th>
                         <th data-sortable="true">Value ($)</th>
-                        <th></th>
                     </thead>
                     <tbody>
                         {% for card in cards %}
                         <tr class="clickable-row">
                             <td>{{ card.BreezecardNum }}</td>
                             <td>{{ card.Value }}</td>
-                            <td id="{{card.BreezecardNum}}-rmv" name="{{card.BreezecardNum}}"><a>Remove</a></td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-        </div> <p></p>
+        </div>
+        </form><p></p>
         <form method="POST" action="" class="form-inline">
-            <div class="form-group">
+            <div class="form-group" style="width: 100%">
                 {{render_field(form.number, class_="form-control input-sm")}}
-                <button class='btn btn-primary btn-sm' type="submit" name="action" value="add-card">Add Card</button><p></p>
+                <button class='btn btn-primary btn-sm' type="submit" name="action" value="add-card">Add Card</button>
+                <button class='btn btn-primary btn-sm' id="remove-button" type="submit" name="action" value="remove-button" style="float: right">Remove Selected Card</button><p></p>
             </div>
             <div class="panel panel-default">
                 <div class="panel-heading">Add Value to Selected Card</div>
@@ -54,18 +55,23 @@
 <script>
 var breezecard = null;
 var value = null;
-//var remove
 
 $('#cards-table').on('click', '.clickable-row', function(event) {
     $(this).removeClass('active');
     $(this).addClass('selected').siblings().removeClass('selected');
-    breezecard = $(this).find('td:first-child').text()
+    breezecard = $(this).find('td:first-child').text();
 });
 
 $('#add-value-button').click(function(e) {
     addValue();
     e.preventDefault();
 });
+
+$('#remove-button').click(function(e) {
+    RemoveCard();
+    e.preventDefault();
+    window.location.reload();
+})
 
 function addValue() {
     value = $('#value').val();
@@ -84,11 +90,15 @@ function addValue() {
     });
 }
 
-// alert($('#cc-number').val())
-// $('#cc-number').onchange = function() {
-//     if $('#cc-number').val().length == 16 {
-//         $('#value').prop('disabled', false);
-//     }
-// };
+function RemoveCard() {
+       $.ajax({
+        type: 'POST',
+        url: '/remove-card',
+        data: {
+            breezecard : breezecard
+        },
+    });
+}
+
 </script>
 {% endblock %}
