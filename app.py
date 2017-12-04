@@ -251,16 +251,21 @@ def beginTrip():
 
     if float(fare) > float(balance):
         cur.close()
-        flash('You do not have enough money on your Breezecard to take this trip.', 'danger')
-        return redirect(url_for('passenger'))
+        return json.dumps(str("low"))
 
     cur.execute("INSERT INTO Trip (Fare, BreezecardNum, StartsAt, EndsAt)"
                 "VALUES (%s, %s, %s, %s)"
                 , (float(fare), breezecard, stopId, None))
 
+    cur.execute("UPDATE Breezecard "
+                "SET Value = %s - %s "
+                "WHERE BreezecardNum = %s"
+                , (float(balance), float(fare), breezecard))
+
     connection.commit()
     cur.close()
-    return None
+
+    return json.dumps(str(float(balance) - float(fare)))
 
 @app.route('/end-trip', methods=['POST'])
 def endTrip():
@@ -439,7 +444,6 @@ def assign_owner():
     previousOwner = request.form['previousOwner']
     assignTo = request.form['assignTo']
 
-    print(number + newOwner + previousOwner + assignTo, file=sys.stderr)
     return None
 
 @app.route('/suspended-cards', methods =['POST', 'GET'])
@@ -468,7 +472,6 @@ def set_value():
 
     #THIS IS WORKING
 
-    print(number + setValueTo, file=sys.stderr)
     return None
 
 @app.route('/transfer-owner', methods=["POST"])
@@ -478,7 +481,6 @@ def transfer_owner():
 
     ##THIS IS WORKING
 
-    print(number + transferTo, file=sys.stderr)
     return None
 
 @app.route('/card-management-admin', methods = ['POST', 'GET'])
@@ -532,7 +534,7 @@ def card_management_admin():
                     "WHERE BreezecardNum NOT IN (SELECT BreezecardNum FROM Conflict) "
                     "AND Owner IS NULL AND BreezecardNum LIKE %s AND Value >= %s AND Value <= %s"
                     , ( cardNumber, float(lowerValue), float(upperValue)))
-                noneCards = cur.fetchall() 
+                noneCards = cur.fetchall()
                 allCards.extend(noneCards)
             if suspended == 1:
                 cur.execute("SELECT DISTINCT B.BreezecardNum, B.Value "
@@ -667,7 +669,7 @@ def card_management_passenger():
 
 class TripHistoryForm(Form):
     start =StringField('')
-    end = StringField('') 
+    end = StringField('')
 @app.route('/trip-history', methods = ['POST', 'GET'])
 @is_logged_in
 def trip_history():
@@ -693,16 +695,12 @@ def trip_history():
                 , (session['username']))
         else:
             try:
-                print('I am here', file = sys.stderr)
                 startTime = request.form['start']
                 endTime = request.form['end']
                 if len(startTime) == 0:
                     startTime = '1950-01-01 00:00:00'
                 if len(endTime) == 0:
                     endTime = '2020-12-31 23:59:59'
-                print(startTime, file=sys.stderr)
-                print(endTime, file=sys.stderr)
-                print(type(startTime), file = sys.stderr)
                 cur.execute("SELECT t.StartTime, s1.Name AS StartName, s2.Name AS EndName, t.Fare, t.BreezecardNum "
                             "FROM Trip as t LEFT JOIN Breezecard as b ON t.BreezecardNum = b.BreezecardNum "
                             "JOIN Station as s1 ON s1.StopID = t.StartsAt "
@@ -710,7 +708,6 @@ def trip_history():
                             "WHERE b.Owner = %s AND t.StartTime BETWEEN %s AND %s"
                             , (session['username'], datetime.datetime.strptime(startTime, '%Y-%m-%d %H:%M:%S'), datetime.datetime.strptime(endTime, '%Y-%m-%d %H:%M:%S')))
                 trips = cur.fetchall()
-                print('I made it here', file = sys.stderr)
                 cur.close()
                 return render_template('trip_history.html', form=form, trips=trips)
             except:
